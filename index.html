@@ -13,286 +13,182 @@
 <title>Karlsruhe Taubentürme – Abdeckungsanalyse</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐦</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg:#f5f5f0;--surface:#ffffff;--border:#ddd8d0;
-    --text:#1a1a1a;--text-muted:#6b6560;--accent:#d4421e;
-    --covered:#1a8a65;--gap:#c0392b;--tower:#d4851e;--suggested:#1a7a8a;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{height:100dvh;overflow:hidden;}
-  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
-  .header{
-    padding:1.4rem 2rem 1.1rem;border-bottom:1px solid var(--border);background:var(--surface);
-    display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;
-  }
-  .header-left h1{font-family:'DM Serif Display',serif;font-size:1.55rem;font-weight:400;margin-bottom:0.2rem;}
-  .header-left h1 span{color:var(--accent);}
-  .header-left p{color:var(--text-muted);font-size:0.88rem;max-width:500px;line-height:1.5;}
-  .stats-row{display:flex;gap:1rem;flex-wrap:wrap;}
-  .stat-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:0.6rem 1rem;min-width:115px;}
-  .stat-card .label{font-size:0.66rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.15rem;}
-  .stat-card .value{font-family:'DM Serif Display',serif;font-size:1.45rem;}
-  .stat-card .value.danger{color:var(--gap);}
-  .stat-card .value.success{color:var(--covered);}
-  .stat-card .value.warn{color:var(--tower);}
-  .main-container{display:grid;grid-template-columns:1fr 440px;flex:1;min-height:0;}
-  @media(max-width:900px){
-    html,body{height:auto;overflow:auto;}
-    body{display:block;}
-    .main-container{grid-template-columns:1fr;flex:none;}
-    .map-wrap{height:60vh;}
-    .sidebar{border-left:none!important;border-top:1px solid var(--border);}
-  }
-  .map-wrap{position:relative;overflow:hidden;background:#e8e4de;}
-  canvas#map{width:100%;height:100%;display:block;cursor:grab;touch-action:none;}
-  canvas#map:active{cursor:grabbing;}
-  .overlay-panel{
-    position:absolute;background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);
-    border:1px solid var(--border);border-radius:9px;padding:0.6rem 0.8rem;font-size:0.76rem;
-    box-shadow:0 2px 8px rgba(0,0,0,0.06);
-  }
-  .legend{top:0.7rem;left:0.7rem;display:flex;flex-direction:column;gap:0.35rem;}
-  .legend-item{display:flex;align-items:center;gap:0.4rem;color:var(--text-muted);}
-  .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-  .controls-panel{top:0.7rem;right:0.7rem;display:flex;flex-direction:column;gap:0.3rem;}
-  .toggle-row{display:flex;align-items:center;gap:0.4rem;cursor:pointer;user-select:none;color:var(--text-muted);}
-  .toggle-row input[type="checkbox"]{accent-color:var(--accent);width:13px;height:13px;}
-  .radius-control{display:flex;gap:0.3rem;margin-top:0.35rem;}
-  .radius-btn{
-    background:var(--bg);border:1px solid var(--border);color:var(--text-muted);
-    padding:0.25rem 0.65rem;border-radius:5px;font-size:0.75rem;cursor:pointer;
-    transition:all 0.15s;font-family:'DM Sans',sans-serif;
-  }
-  .radius-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(212,66,30,0.06);font-weight:700;}
-  .radius-btn:hover{border-color:var(--text-muted);color:var(--text);}
-  .map-nav{
-    position:absolute;bottom:0.8rem;left:0.8rem;
-    display:flex;flex-direction:column;gap:0.35rem;
-  }
-  .map-nav button{
-    background:var(--surface);border:1px solid var(--border);color:var(--text);
-    width:30px;height:30px;border-radius:6px;font-size:1rem;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 1px 4px rgba(0,0,0,0.08);transition:all 0.15s;
-  }
-  .map-nav button:hover{background:var(--bg);}
-  .attribution{
-    position:absolute;bottom:0.3rem;right:0.7rem;
-    font-size:0.56rem;color:rgba(100,95,90,0.6);
-  }
-  .attribution a{color:rgba(100,95,90,0.8);text-decoration:none;}
-  .sidebar{
-    border-left:1px solid var(--border);background:var(--surface);
-    overflow-y:auto;padding:1.1rem;display:flex;flex-direction:column;gap:1.1rem;
-  }
-  .sidebar h2{font-family:'DM Serif Display',serif;font-size:1.05rem;font-weight:400;margin-bottom:0.35rem;}
-  .zone-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.75rem;}
-  .zone-card h3{font-size:0.85rem;font-weight:700;margin-bottom:0.25rem;}
-  .zone-card p{font-size:0.78rem;color:var(--text-muted);line-height:1.5;}
-  .zone-gap{border-left:3px solid var(--gap);}
-  .cta{
-    background:linear-gradient(135deg,rgba(212,66,30,0.06),rgba(192,57,43,0.04));
-    border:1px solid rgba(212,66,30,0.2);border-radius:8px;padding:1rem;text-align:center;
-  }
-  .cta h3{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--accent);margin-bottom:0.3rem;}
-  .cta p{font-size:0.78rem;color:var(--text-muted);line-height:1.5;}
-  .methodology{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.75rem;}
-  .methodology h3{font-size:0.76rem;font-weight:700;color:var(--text-muted);margin-bottom:0.25rem;}
-  .methodology p{font-size:0.72rem;color:var(--text-muted);line-height:1.5;}
-  .radius-label{font-size:0.68rem;color:var(--text-muted);margin-top:0.4rem;margin-bottom:0.15rem;}
-  .legend-triangle{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid var(--hotspot);flex-shrink:0;}
-  :root{--hotspot:#e25822;}
-  .source-link{font-size:0.66rem;color:var(--text-muted);text-decoration:none;border-bottom:1px dotted var(--border);}
-  .source-link:hover{color:var(--accent);border-color:var(--accent);}
-  .source-tag{font-size:0.64rem;color:var(--text-muted);}
-  .stale-tag{font-size:0.62rem;color:#a08060;font-style:italic;}
-  .sidebar details{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.75rem;}
-  .sidebar details summary{font-size:0.85rem;font-weight:700;cursor:pointer;list-style:none;display:flex;align-items:center;gap:0.4rem;}
-  .sidebar details summary::-webkit-details-marker{display:none;}
-  .sidebar details summary::before{content:'▸';font-size:0.76rem;color:var(--text-muted);transition:transform 0.15s;}
-  .sidebar details[open] summary::before{transform:rotate(90deg);}
-  .sidebar details .detail-body{margin-top:0.5rem;font-size:0.75rem;color:var(--text-muted);line-height:1.55;}
-  .sidebar details .detail-body p{margin-bottom:0.4rem;}
-  .sidebar details .detail-body ul{padding-left:1.1rem;margin-bottom:0.4rem;}
-  .sidebar details .detail-body li{margin-bottom:0.25rem;}
-  .fact-grid{display:flex;flex-direction:column;gap:0.5rem;margin-top:0.35rem;}
-  .fact-row{font-size:0.75rem;line-height:1.45;color:var(--text-muted);}
-  .fact-label{font-weight:700;color:var(--text);}
-  .kern-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:0.5rem;}
-  .kern-list li{font-size:0.78rem;line-height:1.5;color:var(--text-muted);padding-left:0.9rem;position:relative;}
-  .kern-list li::before{content:'→';position:absolute;left:0;color:var(--accent);font-weight:700;}
-  .source-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:0.3rem;margin-top:0.35rem;}
-  .source-list li{font-size:0.68rem;color:var(--text-muted);line-height:1.45;}
-  .comparison{
-    background:linear-gradient(135deg,rgba(26,122,138,0.06),rgba(26,138,101,0.04));
-    border:1px solid rgba(26,122,138,0.25);border-radius:8px;padding:1rem;
-  }
-  .comparison h2{font-family:'DM Serif Display',serif;font-size:1.05rem;font-weight:400;color:var(--suggested);margin-bottom:0.15rem;}
-  .comparison .comparison-intro{font-size:0.75rem;color:var(--text-muted);line-height:1.5;margin-bottom:0.7rem;}
-  .comparison-grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:0 0.6rem;font-size:0.75rem;line-height:1.8;}
-  .comparison-grid .cg-header{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;color:var(--text-muted);padding-bottom:0.15rem;border-bottom:1px solid var(--border);}
-  .comparison-grid .cg-label{font-weight:700;color:var(--text);padding:0.1rem 0;}
-  .comparison-grid .cg-val{color:var(--text-muted);padding:0.1rem 0;}
-  .comparison-grid .cg-val.highlight{color:var(--gap);font-weight:700;}
-  .comparison-bar{margin-top:0.6rem;}
-  .comparison-bar .bar-label{font-size:0.66rem;color:var(--text-muted);margin-bottom:0.2rem;}
-  .comparison-bar .bar-track{background:var(--bg);border:1px solid var(--border);border-radius:4px;height:18px;position:relative;overflow:hidden;}
-  .comparison-bar .bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding:0 0.4rem;font-size:0.62rem;font-weight:700;color:#fff;}
-  .comparison-bar .bar-fill.augsburg{background:var(--covered);width:100%;}
-  .comparison-bar .bar-fill.karlsruhe{background:var(--gap);width:36%;}
-  .comparison-note{font-size:0.68rem;color:var(--text-muted);line-height:1.5;margin-top:0.6rem;}
-  .comparison-sources{margin-top:0.5rem;font-size:0.62rem;color:var(--text-muted);line-height:1.5;}
-  .study-section{
-    background:linear-gradient(135deg,rgba(212,66,30,0.06),rgba(192,57,43,0.03));
-    border:1px solid rgba(212,66,30,0.25);border-radius:8px;padding:1rem;
-  }
-  .study-section h2{font-family:'DM Serif Display',serif;font-size:1.05rem;font-weight:400;color:var(--accent);margin-bottom:0.15rem;}
-  .study-intro{font-size:0.75rem;color:var(--text-muted);line-height:1.5;margin-bottom:0.7rem;}
-  .study-table{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.7rem;}
-  .study-group-header{font-size:0.66rem;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;
-    padding:0.25rem 0.5rem;border-radius:4px;margin-bottom:0.15rem;}
-  .study-group-header.with-loft{background:rgba(26,138,101,0.1);color:var(--covered);}
-  .study-group-header.without-loft{background:rgba(192,57,43,0.08);color:var(--gap);}
-  .study-row{display:grid;grid-template-columns:1fr auto auto;gap:0.4rem;align-items:center;
-    font-size:0.75rem;padding:0.15rem 0.5rem;}
-  .study-name{color:var(--text);font-weight:500;}
-  .study-trend{font-weight:700;font-size:0.72rem;}
-  .study-trend.declining{color:var(--covered);}
-  .study-trend.increasing{color:var(--gap);}
-  .study-trend.stable{color:var(--text-muted);}
-  .study-stat{font-size:0.64rem;color:var(--text-muted);font-style:italic;}
-  .study-quote{border-left:3px solid var(--accent);padding:0.5rem 0.7rem;margin:0.5rem 0;
-    font-size:0.72rem;color:var(--text-muted);line-height:1.5;font-style:italic;}
-  .study-quote cite{display:block;font-size:0.62rem;margin-top:0.25rem;font-style:normal;font-weight:700;}
-  .study-response{background:rgba(192,57,43,0.06);border-radius:4px;padding:0.5rem 0.7rem;
-    font-size:0.72rem;color:var(--text-muted);line-height:1.5;margin-bottom:0.5rem;}
-  .legend-diamond{width:9px;height:9px;transform:rotate(45deg);border:1.5px solid var(--text-muted);
-    background:rgba(107,101,96,0.15);flex-shrink:0;}
-</style>
+<link rel="stylesheet" href="style.css">
 <script async src="https://plausible.poweredby.soy/js/pa-fG5WecfpzN9iivmvL3tnp.js"></script>
 <script>
   window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
   plausible.init()
 </script>
 </head>
-<body>
+<body class="font-sans bg-stone-100 text-stone-900 md:flex md:flex-col md:h-dvh md:overflow-hidden">
 
-<div class="header">
-  <div class="header-left">
-    <h1>Karlsruher Taubentürme — <span>Abdeckungsanalyse</span></h1>
-    <p>Fünf Taubentürme versorgen nur einen Bruchteil der Stadtfläche.<br>Diese Analyse zeigt die Versorgungslücken im Augsburger Modell.</p>
+<!-- Header -->
+<div class="px-5 pt-4 pb-3 border-b border-stone-300 bg-white flex items-start justify-between gap-4 flex-wrap lg:px-8">
+  <div>
+    <h1 class="font-serif text-2xl">Karlsruher Taubentürme — <span class="text-orange-700">Abdeckungsanalyse</span></h1>
+    <p class="text-stone-500 text-sm max-w-lg leading-relaxed mt-0.5">Fünf Taubentürme versorgen nur einen Bruchteil der Stadtfläche.<br>Diese Analyse zeigt die Versorgungslücken im Augsburger Modell.</p>
   </div>
-  <div class="stats-row">
-    <div class="stat-card"><div class="label">Aktive Türme</div><div class="value warn">5</div></div>
-    <div class="stat-card"><div class="label">Radius <span id="radiusLabel">500m</span></div><div class="value success" id="coveredPct">—</div></div>
-    <div class="stat-card"><div class="label">Versorgungslücke</div><div class="value danger" id="gapPct">—</div></div>
+  <div class="flex gap-3 flex-wrap">
+    <div class="stat-card">
+      <div class="text-2xs uppercase tracking-wider text-stone-500 mb-0.5">Aktive Türme</div>
+      <div class="font-serif text-2xl text-amber-600">5</div>
+    </div>
+    <div class="stat-card">
+      <div class="text-2xs uppercase tracking-wider text-stone-500 mb-0.5">Abdeckung (<span id="radiusLabel">500m</span>)</div>
+      <div class="font-serif text-2xl text-emerald-600" id="coveredPct">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="text-2xs uppercase tracking-wider text-stone-500 mb-0.5">Versorgungslücke</div>
+      <div class="font-serif text-2xl text-red-700" id="gapPct">—</div>
+    </div>
   </div>
 </div>
 
-<div class="main-container">
-  <div class="map-wrap">
-    <canvas id="map"></canvas>
+<!-- Main layout -->
+<div class="md:grid md:grid-cols-[1fr_440px] md:flex-1 md:min-h-0">
 
-    <div class="overlay-panel legend">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--tower);box-shadow:0 0 4px var(--tower)"></div><span>Bestehender Turm</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--covered)"></div><span>Abdeckungsradius</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:rgba(192,57,43,0.3)"></div><span>Versorgungslücke</span></div>
-      <div class="legend-item"><div class="legend-triangle"></div><span>Zählstandort (Bioplan)</span></div>
-      <div class="legend-item"><div class="legend-diamond"></div><span>Weiterer Hotspot</span></div>
+  <!-- Map -->
+  <div class="relative overflow-hidden bg-stone-200">
+    <canvas id="map" class="w-full h-[60vh] md:h-full block cursor-grab"></canvas>
+
+    <!-- Legend -->
+    <div class="overlay-panel top-2.5 left-2.5">
+      <div class="flex items-center gap-1.5 text-stone-500">
+        <div class="size-2.5 rounded-full bg-amber-600 shadow-[0_0_4px_theme(colors.amber.600)] shrink-0"></div>
+        <span>Bestehender Turm</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-stone-500">
+        <div class="size-2.5 rounded-full bg-emerald-600 shrink-0"></div>
+        <span>Abdeckungsradius</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-stone-500">
+        <div class="size-2.5 rounded-full bg-red-700/30 shrink-0"></div>
+        <span>Versorgungslücke</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-stone-500">
+        <div class="w-0 h-0 border-x-[5px] border-x-transparent border-b-[9px] border-b-orange-600 shrink-0"></div>
+        <span>Zählstandort (Bioplan)</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-stone-500">
+        <div class="size-2.5 rotate-45 border-[1.5px] border-stone-500 bg-stone-500/15 shrink-0"></div>
+        <span>Weiterer Hotspot</span>
+      </div>
     </div>
 
-    <div class="overlay-panel controls-panel">
-      <label class="toggle-row"><input type="checkbox" id="togGap" checked> Lücken-Heatmap</label>
-      <label class="toggle-row"><input type="checkbox" id="togHotspots" checked> Hotspots & Zählstandorte</label>
-      <label class="toggle-row"><input type="checkbox" id="togLabels" checked> Beschriftung</label>
-      <div class="radius-label">Analyse-Radius:</div>
-      <div class="radius-control">
+    <!-- Controls -->
+    <div class="overlay-panel top-2.5 right-2.5">
+      <label class="flex items-center gap-1.5 cursor-pointer select-none text-stone-500">
+        <input type="checkbox" id="togGap" checked class="accent-orange-700 size-3.5 focus-visible:ring-2 focus-visible:ring-orange-700/50">
+        Lücken-Heatmap
+      </label>
+      <label class="flex items-center gap-1.5 cursor-pointer select-none text-stone-500">
+        <input type="checkbox" id="togHotspots" checked class="accent-orange-700 size-3.5 focus-visible:ring-2 focus-visible:ring-orange-700/50">
+        Hotspots & Zählstandorte
+      </label>
+      <label class="flex items-center gap-1.5 cursor-pointer select-none text-stone-500">
+        <input type="checkbox" id="togLabels" checked class="accent-orange-700 size-3.5 focus-visible:ring-2 focus-visible:ring-orange-700/50">
+        Beschriftung
+      </label>
+      <div class="text-xs text-stone-500 mt-1.5 mb-0.5">Analyse-Radius:</div>
+      <div class="flex gap-1">
         <button class="radius-btn" data-r="300">300m</button>
         <button class="radius-btn active" data-r="500">500m</button>
         <button class="radius-btn" data-r="1000">1km</button>
       </div>
     </div>
 
-    <div class="map-nav">
-      <button id="zoomIn">+</button>
-      <button id="zoomOut">−</button>
-      <button id="resetView">⌂</button>
-      <button id="locateMe" title="Mein Standort">◎</button>
+    <!-- Map nav buttons -->
+    <div class="absolute bottom-3 left-3 flex flex-col gap-1.5">
+      <button id="zoomIn" title="Hineinzoomen" class="map-btn">+</button>
+      <button id="zoomOut" title="Herauszoomen" class="map-btn">−</button>
+      <button id="resetView" title="Ansicht zurücksetzen" class="map-btn">⌂</button>
+      <button id="locateMe" title="Mein Standort" class="map-btn">◎</button>
     </div>
-    <div id="locBanner" style="display:none;position:absolute;bottom:0.8rem;left:50%;transform:translateX(-50%);
-      background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);border:1px solid var(--border);
-      border-radius:9px;padding:0.5rem 0.9rem;font-size:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);
-      text-align:center;max-width:280px;line-height:1.4;"></div>
 
-    <div class="attribution">
-      Kartendaten &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a> |
-      &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
+    <!-- Location banner -->
+    <div id="locBanner" class="hidden absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/93 backdrop-blur-sm border border-stone-300 rounded-lg px-3.5 py-2 text-xs shadow-sm text-center max-w-72 leading-snug"></div>
+
+    <!-- Attribution -->
+    <div class="absolute bottom-1 right-2.5 text-2xs text-stone-500/60">
+      Kartendaten &copy; <a href="https://carto.com/attributions" target="_blank" class="text-stone-500/80 no-underline">CARTO</a> |
+      &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" class="text-stone-500/80 no-underline">OpenStreetMap</a>
     </div>
   </div>
 
-  <div class="sidebar">
+  <!-- Sidebar -->
+  <div class="sidebar border-t border-stone-300 md:border-t-0 md:border-l bg-white overflow-y-auto p-4 flex flex-col gap-4">
+
     <!-- Kernargumente -->
-    <div class="cta" style="text-align:left;">
-      <h3 style="text-align:left;margin-bottom:0.5rem;">Kernargumente</h3>
-      <ul class="kern-list">
-        <li><strong>Eigene Studie belegt Wirksamkeit:</strong> Die von der Stadt beauftragte 5-Jahres-Studie (Bioplan, 2019–2024) zeigt: An Standorten mit betreuten Schlägen sinkt die Population signifikant. An Hotspots ohne Schlag wächst sie — am Kronenplatz signifikant (p = 0,006). Die Studie empfiehlt mehr Schläge. <span class="source-tag">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan Endbericht, Sep. 2025</a>)</span></li>
-        <li><strong>Budget gekürzt:</strong> Futterbudget von 15.000 € auf 13.000 €/Jahr reduziert, Futterqualität gesenkt. Gesamtkürzung: 5.000 €/Jahr — trotz Studienempfehlung für zusätzliche Türme. <span class="source-tag">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671296.pdf" target="_blank">Informationsvorlage 2025/1019</a>)</span></li>
-        <li><strong>Hotspots ohne Türme:</strong> Kronenplatz ist der einzige Hotspot mit statistisch signifikant wachsender Population (p = 0,006). Ein Taubenschlag wurde 2023 diskutiert — bis heute nicht gebaut. Auch Europaplatz und Ostring bleiben ohne Turm. <span class="source-tag">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan, 2025</a>; <a class="source-link" href="https://archive.is/GlMuB" target="_blank">BNN, 2023</a>)</span></li>
-        <li><strong>30 Jahre Fütterungsverbot:</strong> Das Fütterungsverbot besteht seit 1994. Trotzdem bleiben Hotspot-Populationen stabil oder wachsen. Die Stadt setzt weiterhin auf verstärkte Kontrollen. <span class="source-tag">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671296.pdf" target="_blank">Informationsvorlage 2025/1019</a>)</span></li>
-        <li><strong>Wissenschaftliche Reichweite:</strong> 92,5% der Stadttauben fliegen weniger als 2 km und ein Drittel bleibt innerhalb von 300 m (Rose et al. 2006, bestätigt durch Yen et al. 2018). Türme müssen nah sein, um zu wirken.</li>
+    <div class="bg-linear-to-br from-orange-700/5 to-red-700/4 border border-orange-700/20 rounded-lg p-4">
+      <h3 class="font-serif text-base text-orange-700 mb-2">Kernargumente</h3>
+      <ul class="kern-list list-none p-0 flex flex-col gap-2">
+        <li>
+          <strong class="text-stone-900">Eigene Studie belegt Wirksamkeit:</strong> Die von der Stadt beauftragte 5-Jahres-Studie (Bioplan, 2019–2024) zeigt: An Standorten mit betreuten Schlägen sinkt die Population signifikant. An Hotspots ohne Schlag wächst sie — am Kronenplatz signifikant (p = 0,006). Die Studie empfiehlt mehr Schläge. <span class="text-2xs">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan Endbericht, Sep. 2025</a>)</span>
+        </li>
+        <li>
+          <strong class="text-stone-900">Budget gekürzt:</strong> Futterbudget von 15.000 € auf 13.000 €/Jahr reduziert, Futterqualität gesenkt. Gesamtkürzung: 5.000 €/Jahr — trotz Studienempfehlung für zusätzliche Türme. <span class="text-2xs">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671296.pdf" target="_blank">Informationsvorlage 2025/1019</a>)</span>
+        </li>
+        <li>
+          <strong class="text-stone-900">Hotspots ohne Türme:</strong> Kronenplatz ist der einzige Hotspot mit statistisch signifikant wachsender Population (p = 0,006). Ein Taubenschlag wurde 2023 diskutiert — bis heute nicht gebaut. Auch Europaplatz und Ostring bleiben ohne Turm. <span class="text-2xs">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan, 2025</a>; <a class="source-link" href="https://archive.is/GlMuB" target="_blank">BNN, 2023</a>)</span>
+        </li>
+        <li>
+          <strong class="text-stone-900">30 Jahre Fütterungsverbot:</strong> Das Fütterungsverbot besteht seit 1994. Trotzdem bleiben Hotspot-Populationen stabil oder wachsen. Die Stadt setzt weiterhin auf verstärkte Kontrollen. <span class="text-2xs">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671296.pdf" target="_blank">Informationsvorlage 2025/1019</a>)</span>
+        </li>
+        <li>
+          <strong class="text-stone-900">Wissenschaftliche Reichweite:</strong> 92,5% der Stadttauben fliegen weniger als 2 km und ein Drittel bleibt innerhalb von 300 m (Rose et al. 2006, bestätigt durch Yen et al. 2018). Türme müssen nah sein, um zu wirken.
+        </li>
       </ul>
     </div>
 
     <!-- Bioplan-Studie -->
-    <div class="study-section">
-      <h2>Wissenschaftliche Zählung 2019–2024</h2>
-      <p class="study-intro">Eine von der Stadt Karlsruhe beauftragte 5-Jahres-Studie (Bioplan, Sep. 2025) hat monatliche Taubenzählungen an 7 Standorten durchgeführt und mittels linearer Regression die Populationstrends analysiert.</p>
+    <div class="bg-linear-to-br from-orange-700/5 to-red-700/3 border border-orange-700/25 rounded-lg p-4">
+      <h2 class="font-serif text-lg text-orange-700 mb-0.5">Wissenschaftliche Zählung 2019–2024</h2>
+      <p class="text-sm text-stone-500 leading-relaxed mb-3">Eine von der Stadt Karlsruhe beauftragte 5-Jahres-Studie (Bioplan, Sep. 2025) hat monatliche Taubenzählungen an 7 Standorten durchgeführt und mittels linearer Regression die Populationstrends analysiert.</p>
 
-      <div class="study-table">
-        <div class="study-group">
-          <div class="study-group-header with-loft">Mit betreutem Schlag</div>
+      <div class="flex flex-col gap-2 mb-3">
+        <div>
+          <div class="text-2xs uppercase tracking-wide font-bold px-2 py-1 rounded bg-emerald-600/10 text-emerald-600 mb-0.5">Mit betreutem Schlag</div>
           <div class="study-row">
-            <span class="study-name">Rathaus West</span>
-            <span class="study-trend declining">↓ sinkend</span>
-            <span class="study-stat">p = 0,001</span>
+            <span class="text-stone-900 font-medium">Rathaus West</span>
+            <span class="font-bold text-xs text-emerald-600">↓ sinkend</span>
+            <span class="text-2xs text-stone-500 italic">p = 0,001</span>
           </div>
           <div class="study-row">
-            <span class="study-name">Schloss</span>
-            <span class="study-trend declining">↓ sinkend</span>
-            <span class="study-stat">p = 0,001</span>
+            <span class="text-stone-900 font-medium">Schloss</span>
+            <span class="font-bold text-xs text-emerald-600">↓ sinkend</span>
+            <span class="text-2xs text-stone-500 italic">p = 0,001</span>
           </div>
         </div>
-        <div class="study-group">
-          <div class="study-group-header without-loft">Ohne Schlag</div>
+        <div>
+          <div class="text-2xs uppercase tracking-wide font-bold px-2 py-1 rounded bg-red-700/8 text-red-700 mb-0.5">Ohne Schlag</div>
           <div class="study-row">
-            <span class="study-name">Europaplatz</span>
-            <span class="study-trend stable">→ stabil</span>
-            <span class="study-stat">p > 0,5</span>
+            <span class="text-stone-900 font-medium">Europaplatz</span>
+            <span class="font-bold text-xs text-stone-500">→ stabil</span>
+            <span class="text-2xs text-stone-500 italic">p > 0,5</span>
           </div>
           <div class="study-row">
-            <span class="study-name">Kronenplatz</span>
-            <span class="study-trend increasing">↑ wachsend</span>
-            <span class="study-stat">p = 0,006</span>
+            <span class="text-stone-900 font-medium">Kronenplatz</span>
+            <span class="font-bold text-xs text-red-700">↑ wachsend</span>
+            <span class="text-2xs text-stone-500 italic">p = 0,006</span>
           </div>
           <div class="study-row">
-            <span class="study-name">Ostring</span>
-            <span class="study-trend declining">↓ sinkend</span>
-            <span class="study-stat">p < 0,001</span>
+            <span class="text-stone-900 font-medium">Ostring</span>
+            <span class="font-bold text-xs text-emerald-600">↓ sinkend</span>
+            <span class="text-2xs text-stone-500 italic">p < 0,001</span>
           </div>
         </div>
       </div>
 
-      <blockquote class="study-quote">
+      <blockquote class="border-l-3 border-orange-700 px-3 py-2 my-2 text-sm text-stone-500 leading-relaxed italic">
         „Die Einrichtung zusätzlicher betreuter Taubenschläge im Bereich der weiteren Hotspots könnte dazu beitragen, die Taubenbewegungen besser zu steuern und die Population gezielter zu kontrollieren."
-        <cite>— Bioplan Endbericht, Sep. 2025</cite>
+        <cite class="block text-2xs mt-1 not-italic font-bold">— Bioplan Endbericht, Sep. 2025</cite>
       </blockquote>
 
-      <div class="study-response">
+      <div class="bg-red-700/5 rounded px-3 py-2 text-sm text-stone-500 leading-relaxed mb-2">
         <strong>Reaktion der Stadt:</strong> Kürzung des Futterbudgets um 5.000 €/Jahr, Senkung der Futterqualität, verstärkte Kontrollen des Fütterungsverbots, Beschilderung. Keine neuen Taubenschläge.
       </div>
 
-      <p class="comparison-sources">
+      <p class="text-2xs text-stone-500 leading-relaxed mt-2">
         Quellen:
         <a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan Endbericht, Sep. 2025</a>,
         <a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671296.pdf" target="_blank">Informationsvorlage 2025/1019</a>
@@ -300,35 +196,36 @@
       </p>
     </div>
 
-    <div>
-      <h2>Kritische Versorgungslücken</h2>
-      <div style="display:flex;flex-direction:column;gap:0.5rem">
-        <div class="zone-card zone-gap"><h3>Südstadt / Hauptbahnhof</h3><p>Die gesamte südliche Innenstadt hat keinerlei Turmabdeckung. Der Hbf-Bereich ist ein bekannter Tauben-Hotspot mit großen Populationen.</p></div>
-        <div class="zone-card zone-gap"><h3>Oststadt–Durlach Korridor</h3><p>~3 km Strecke ohne Abdeckung. Bahnanlagen bieten Nistplätze, aber keine betreute Versorgung.</p></div>
-        <div class="zone-card zone-gap"><h3>Mühlburg / Westen</h3><p>Westlich des westlichsten Turms fällt die Abdeckung in dicht besiedelte Wohngebiete ab.</p></div>
-        <div class="zone-card zone-gap"><h3>Nordstadt</h3><p>Nördliche Wohngebiete jenseits der 500m-Reichweite bestehender Türme.</p></div>
-      </div>
-    </div>
     <!-- Augsburg-Vergleich -->
-    <div class="comparison">
-      <h2>Vergleich mit dem Vorbild: Augsburg</h2>
-      <p class="comparison-intro">Karlsruhe setzt nach eigenen Angaben das „Augsburger Modell" um. Ein Vergleich mit der Modellstadt zeigt, wie weit die Umsetzung hinterherhinkt.</p>
-      <div class="comparison-grid">
-        <span class="cg-header"></span><span class="cg-header">Augsburg</span><span class="cg-header">Karlsruhe</span>
-        <span class="cg-label">Einwohner</span><span class="cg-val">~300.000</span><span class="cg-val">~310.000</span>
-        <span class="cg-label">Schläge/Türme</span><span class="cg-val">mind. 12–14</span><span class="cg-val highlight">5</span>
-        <span class="cg-label">Eieraustausch</span><span class="cg-val">~6.200/Jahr ↓</span><span class="cg-val">~4.560/Jahr</span>
-        <span class="cg-label">Modell seit</span><span class="cg-val">1995</span><span class="cg-val">2018</span>
-        <span class="cg-label">Populationszählung</span><span class="cg-val">1996</span><span class="cg-val">2019–2024 (7 Standorte)</span>
+    <div class="bg-linear-to-br from-teal-600/5 to-emerald-600/4 border border-teal-600/25 rounded-lg p-4">
+      <h2 class="font-serif text-lg text-teal-600 mb-0.5">Vergleich mit dem Vorbild: Augsburg</h2>
+      <p class="text-sm text-stone-500 leading-relaxed mb-3">Karlsruhe setzt nach eigenen Angaben das „Augsburger Modell" um. Ein Vergleich mit der Modellstadt zeigt, wie weit die Umsetzung hinterherhinkt.</p>
+
+      <div class="grid grid-cols-[auto_1fr_1fr] gap-x-2.5 text-sm leading-7">
+        <span class="text-2xs uppercase tracking-wide font-bold text-stone-500 pb-0.5 border-b border-stone-300"></span>
+        <span class="text-2xs uppercase tracking-wide font-bold text-stone-500 pb-0.5 border-b border-stone-300">Augsburg</span>
+        <span class="text-2xs uppercase tracking-wide font-bold text-stone-500 pb-0.5 border-b border-stone-300">Karlsruhe</span>
+        <span class="font-bold text-stone-900 py-px">Einwohner</span><span class="text-stone-500 py-px">~300.000</span><span class="text-stone-500 py-px">~310.000</span>
+        <span class="font-bold text-stone-900 py-px">Schläge/Türme</span><span class="text-stone-500 py-px">mind. 12–14</span><span class="text-red-700 font-bold py-px">5</span>
+        <span class="font-bold text-stone-900 py-px">Eieraustausch</span><span class="text-stone-500 py-px">~6.200/Jahr ↓</span><span class="text-stone-500 py-px">~4.560/Jahr</span>
+        <span class="font-bold text-stone-900 py-px">Modell seit</span><span class="text-stone-500 py-px">1995</span><span class="text-stone-500 py-px">2018</span>
+        <span class="font-bold text-stone-900 py-px">Populationszählung</span><span class="text-stone-500 py-px">1996</span><span class="text-stone-500 py-px">2019–2024 (7 Standorte)</span>
       </div>
-      <div class="comparison-bar">
-        <div class="bar-label">Schläge/Türme pro ~300.000 Einwohner:</div>
-        <div class="bar-track" style="margin-bottom:0.2rem"><div class="bar-fill augsburg">Augsburg: 12–14</div></div>
-        <div class="bar-track"><div class="bar-fill karlsruhe">KA: 5</div></div>
+
+      <div class="mt-2.5">
+        <div class="text-2xs text-stone-500 mb-1">Schläge/Türme pro ~300.000 Einwohner:</div>
+        <div class="bg-stone-100 border border-stone-300 rounded h-5 relative overflow-hidden mb-1">
+          <div class="h-full rounded-sm flex items-center px-1.5 text-2xs font-bold text-white bg-emerald-600 w-full">Augsburg: 12–14</div>
+        </div>
+        <div class="bg-stone-100 border border-stone-300 rounded h-5 relative overflow-hidden">
+          <div class="h-full rounded-sm flex items-center px-1.5 text-2xs font-bold text-white bg-red-700 w-[36%]">KA: 5</div>
+        </div>
       </div>
-      <p class="comparison-note">In Augsburg sinkt die Zahl der entnommenen Eier über die Jahre — von 13.000 (2013) auf ca. 6.200. Zwischen 2001 und 2016 wurden insgesamt ~109.400 Eier ausgetauscht. Die Population schrumpft nachweislich. Voraussetzung: flächendeckende Infrastruktur mit mindestens 12 Schlägen.</p>
-      <p class="comparison-note">In Augsburg wurden Schläge gezielt an allen Brennpunkten eingerichtet — in Parkhäusern, Wehrtürmen, auf Dachböden und Flachdächern. In Karlsruhe konzentrieren sich die fünf Türme auf die westliche Innenstadt, während Kronenplatz, Europaplatz und Ostring ohne Schlag bleiben.</p>
-      <p class="comparison-sources">
+
+      <p class="text-sm text-stone-500 leading-relaxed mt-2.5">In Augsburg sinkt die Zahl der entnommenen Eier über die Jahre — von 13.000 (2013) auf ca. 6.200. Zwischen 2001 und 2016 wurden insgesamt ~109.400 Eier ausgetauscht. Die Population schrumpft nachweislich. Voraussetzung: flächendeckende Infrastruktur mit mindestens 12 Schlägen.</p>
+      <p class="text-sm text-stone-500 leading-relaxed mt-2.5">In Augsburg wurden Schläge gezielt an allen Brennpunkten eingerichtet — in Parkhäusern, Wehrtürmen, auf Dachböden und Flachdächern. In Karlsruhe konzentrieren sich die fünf Türme auf die westliche Innenstadt, während Kronenplatz, Europaplatz und Ostring ohne Schlag bleiben.</p>
+
+      <p class="text-2xs text-stone-500 leading-relaxed mt-2">
         Quellen:
         <a class="source-link" href="https://www.augsburg.de/umwelt-soziales/umwelt/umweltstadt-augsburg/stadttaubenkonzept" target="_blank">augsburg.de</a>,
         <a class="source-link" href="https://www.tierschutzverein-augsburg.de/ueber-uns/augsburger-stadttauben/" target="_blank">Tierheim Augsburg, 2024</a>,
@@ -337,90 +234,90 @@
       </p>
     </div>
 
-    <div class="cta">
-      <h3>5 Türme schützen nur einen Bruchteil.</h3>
-      <p>Ein Fütterungsverbot ohne ausreichende Turminfrastruktur zwingt die Mehrheit der Karlsruher Stadttauben zum Hungern — nicht weil sie keine Türme nutzen würden, sondern weil es keine Türme für sie gibt.</p>
-    </div>
+
     <!-- Karlsruhe Fakten -->
-    <details>
+    <details class="section-card">
       <summary>Karlsruhe Fakten</summary>
-      <div class="detail-body">
-        <div class="fact-grid">
-          <div class="fact-row"><span class="fact-label">Aktive Türme:</span> 5 Taubenschläge/-türme (Mühlburger Tor, Blumenstraße 2a, Schlossplatz, B36/Lindenallee, Heinrich-Meidinger-Schule), plus ein weiterer in der Durlacher Karlsburg in Einrichtung <span class="source-tag">(<a class="source-link" href="https://www.ka-news.de/region/karlsruhe/taubenplage-in-karlsruhe-wird-es-immer-schlimmer-art-1991480" target="_blank">ka-news, 2023</a>)</span></div>
-          <div class="fact-row"><span class="fact-label">Betreute Tauben:</span> Bestand wuchs von 260 (Nov. 2018) auf über 1.100 <span class="stale-tag">(Stand: 2019, möglicherweise veraltet)</span> <span class="source-tag">(<a class="source-link" href="https://www.karlsruhe-insider.de/news/mit-dieser-idee-soll-karlsruhe-taubenfrei-gehalten-werden-29671/" target="_blank">karlsruhe-insider, 2019</a>)</span></div>
-          <div class="fact-row"><span class="fact-label">Eieraustausch:</span> ~380 Eier/Monat durch Gipsattrappen ersetzt <span class="stale-tag">(Stand: 2019, möglicherweise veraltet)</span> <span class="source-tag">(<a class="source-link" href="https://www.karlsruhe-insider.de/news/mit-dieser-idee-soll-karlsruhe-taubenfrei-gehalten-werden-29671/" target="_blank">karlsruhe-insider, 2019</a>)</span></div>
-          <div class="fact-row"><span class="fact-label">Budget:</span> Futterbudget: 13.000 €/Jahr (gekürzt von 15.000 €). Sonstige Kosten: 1.000 €/Jahr (gekürzt von 4.000 €). Futterqualität reduziert. <span class="source-tag">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671296.pdf" target="_blank">Informationsvorlage 2025/1019</a>)</span></div>
-          <div class="fact-row"><span class="fact-label">Populationsdaten:</span> Bioplan-Studie 2019–2024: monatliche Zählungen an 7 Standorten, lineare Regression. Ergebnis: signifikanter Rückgang an betreuten Schlägen, stabiler oder wachsender Bestand an unbetreuten Hotspots. <span class="source-tag">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan, Sep. 2025</a>)</span></div>
-          <div class="fact-row"><span class="fact-label">Fütterungsverbot:</span> Seit 1994, über 30 Jahre. KOD-Kontrollen: 16 Kontrollen am Friedrichsplatz (Okt. 2025), null Verstöße festgestellt. Bußgelder bis 5.000 € möglich. <span class="source-tag">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671296.pdf" target="_blank">Informationsvorlage 2025/1019</a>)</span></div>
-          <div class="fact-row"><span class="fact-label">Hotspots:</span> Europaplatz, Kronenplatz, Ostring (Bioplan-Zählstandorte). Weitere: St.-Stefan-Kirche, Hauptbahnhof (stichprobenartig bestätigt). <span class="source-tag">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan, Sep. 2025</a>)</span></div>
-          <div class="fact-row"><span class="fact-label">Kronenplatz:</span> Einziger Hotspot mit statistisch signifikant wachsender Population (β = 0,026, p = 0,006). Taubenschlag 2023 im Ausschuss diskutiert, bis heute nicht errichtet. <span class="source-tag">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan, 2025</a>; <a class="source-link" href="https://archive.is/GlMuB" target="_blank">BNN, 2023</a>)</span></div>
-          <div class="fact-row"><span class="fact-label">Waldstadt:</span> ~350 Tauben aus dem Waldstadtzentrum umgesiedelt <span class="source-tag">(<a class="source-link" href="https://meinka.de/karlsruher-taubenpopulation-wie-laeuft-das-augsburger-modell/" target="_blank">meinKA, 2020</a>)</span></div>
-          <div class="fact-row"><span class="fact-label">Tierschutzpreis:</span> Stadttaubenkonzept Karlsruhe e.V. erhielt 2019 den Tierschutzpreis Baden-Württemberg</div>
+      <div class="mt-2 text-sm text-stone-500 leading-relaxed">
+        <div class="flex flex-col gap-2 mt-1.5">
+          <div class="fact-row"><span class="font-bold text-stone-900">Aktive Türme:</span> 5 Taubenschläge/-türme (Mühlburger Tor, Blumenstraße 2a, Schlossplatz, B36/Lindenallee, Heinrich-Meidinger-Schule), plus ein weiterer in der Durlacher Karlsburg in Einrichtung <span class="text-2xs">(<a class="source-link" href="https://www.ka-news.de/region/karlsruhe/taubenplage-in-karlsruhe-wird-es-immer-schlimmer-art-1991480" target="_blank">ka-news, 2023</a>)</span></div>
+          <div class="fact-row"><span class="font-bold text-stone-900">Betreute Tauben:</span> Bestand wuchs von 260 (Nov. 2018) auf über 1.100 <span class="text-2xs text-amber-700 italic">(Stand: 2019, möglicherweise veraltet)</span> <span class="text-2xs">(<a class="source-link" href="https://www.karlsruhe-insider.de/news/mit-dieser-idee-soll-karlsruhe-taubenfrei-gehalten-werden-29671/" target="_blank">karlsruhe-insider, 2019</a>)</span></div>
+          <div class="fact-row"><span class="font-bold text-stone-900">Eieraustausch:</span> ~380 Eier/Monat durch Gipsattrappen ersetzt <span class="text-2xs text-amber-700 italic">(Stand: 2019, möglicherweise veraltet)</span> <span class="text-2xs">(<a class="source-link" href="https://www.karlsruhe-insider.de/news/mit-dieser-idee-soll-karlsruhe-taubenfrei-gehalten-werden-29671/" target="_blank">karlsruhe-insider, 2019</a>)</span></div>
+          <div class="fact-row"><span class="font-bold text-stone-900">Budget:</span> Futterbudget: 13.000 €/Jahr (gekürzt von 15.000 €). Sonstige Kosten: 1.000 €/Jahr (gekürzt von 4.000 €). Futterqualität reduziert. <span class="text-2xs">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671296.pdf" target="_blank">Informationsvorlage 2025/1019</a>)</span></div>
+          <div class="fact-row"><span class="font-bold text-stone-900">Populationsdaten:</span> Bioplan-Studie 2019–2024: monatliche Zählungen an 7 Standorten, lineare Regression. Ergebnis: signifikanter Rückgang an betreuten Schlägen, stabiler oder wachsender Bestand an unbetreuten Hotspots. <span class="text-2xs">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan, Sep. 2025</a>)</span></div>
+          <div class="fact-row"><span class="font-bold text-stone-900">Fütterungsverbot:</span> Seit 1994, über 30 Jahre. KOD-Kontrollen: 16 Kontrollen am Friedrichsplatz (Okt. 2025), null Verstöße festgestellt. Bußgelder bis 5.000 € möglich. <span class="text-2xs">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671296.pdf" target="_blank">Informationsvorlage 2025/1019</a>)</span></div>
+          <div class="fact-row"><span class="font-bold text-stone-900">Hotspots:</span> Europaplatz, Kronenplatz, Ostring (Bioplan-Zählstandorte). Weitere: St.-Stefan-Kirche, Hauptbahnhof (stichprobenartig bestätigt). <span class="text-2xs">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan, Sep. 2025</a>)</span></div>
+          <div class="fact-row"><span class="font-bold text-stone-900">Kronenplatz:</span> Einziger Hotspot mit statistisch signifikant wachsender Population (β = 0,026, p = 0,006). Taubenschlag 2023 im Ausschuss diskutiert, bis heute nicht errichtet. <span class="text-2xs">(<a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan, 2025</a>; <a class="source-link" href="https://archive.is/GlMuB" target="_blank">BNN, 2023</a>)</span></div>
+          <div class="fact-row"><span class="font-bold text-stone-900">Waldstadt:</span> ~350 Tauben aus dem Waldstadtzentrum umgesiedelt <span class="text-2xs">(<a class="source-link" href="https://meinka.de/karlsruher-taubenpopulation-wie-laeuft-das-augsburger-modell/" target="_blank">meinKA, 2020</a>)</span></div>
+          <div class="fact-row"><span class="font-bold text-stone-900">Tierschutzpreis:</span> Stadttaubenkonzept Karlsruhe e.V. erhielt 2019 den Tierschutzpreis Baden-Württemberg</div>
         </div>
       </div>
     </details>
 
     <!-- Wissenschaftliche Grundlage der Radien -->
-    <details>
+    <details class="section-card">
       <summary>Wissenschaftliche Grundlage der Radien</summary>
-      <div class="detail-body">
+      <div class="mt-2 text-sm text-stone-500 leading-relaxed">
         <p>Die Analyse-Radien (300 m / 500 m / 1 km) basieren auf der publizierten Forschung zum Raumverhalten von Stadttauben:</p>
-        <p><strong>Rose, Nagel & Haag-Wackernagel (2006)</strong> — GPS-Tracking verwilderter Stadttauben in Basel. Standardreferenz für urbanes Tauben-Raumverhalten, bis heute in aktuellen Publikationen zitiert und nicht widerlegt.</p>
-        <ul>
-          <li>32% blieben innerhalb von 300 m ihres Schlags</li>
-          <li>Mittlere tägliche Bewegung: ~590 m</li>
-          <li>Nur 7,5% flogen weiter als 2 km</li>
-          <li>Weibchen legten größere Distanzen zurück</li>
+        <p class="mt-1.5"><strong class="text-stone-900">Rose, Nagel & Haag-Wackernagel (2006)</strong> — GPS-Tracking verwilderter Stadttauben in Basel. Standardreferenz für urbanes Tauben-Raumverhalten, bis heute in aktuellen Publikationen zitiert und nicht widerlegt.</p>
+        <ul class="pl-4 my-1.5 list-disc">
+          <li class="mb-1">32% blieben innerhalb von 300 m ihres Schlags</li>
+          <li class="mb-1">Mittlere tägliche Bewegung: ~590 m</li>
+          <li class="mb-1">Nur 7,5% flogen weiter als 2 km</li>
+          <li class="mb-1">Weibchen legten größere Distanzen zurück</li>
         </ul>
-        <p style="font-size:0.6rem;"><a class="source-link" href="https://link.springer.com/article/10.1007/s00265-006-0162-8" target="_blank">Behavioral Ecology and Sociobiology, 2006</a></p>
-        <p><strong>Yen et al. (2018)</strong> — Genomische Studie in Singapur. Bestätigt die Basler Ergebnisse: genetische Patchgröße ~3 km, 92,5% suchten innerhalb von 2 km nach Nahrung.</p>
-        <p style="font-size:0.6rem;"><a class="source-link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6183452/" target="_blank">PMC/NIH, 2018</a></p>
-        <p><strong>Sol & Senar (1995)</strong> — Home-Range: 1,64 ha. Konsistent als Baseline in moderner Literatur zitiert (z.B. Carlen et al. 2021).</p>
-        <p><strong>Giunchi et al. (2012)</strong> — Pendelflüge 3–20 km, aber ländlich/landwirtschaftlich — nicht typisches urbanes Verhalten. 1 km ist bereits großzügig für den städtischen Kontext.</p>
-        <p style="margin-top:0.5rem;font-size:0.65rem;"><strong>Fazit:</strong> 300 m = starke Anbindung, 500 m = mäßig, 1 km = theoretisches Maximum für regelmäßige urbane Nutzung.</p>
+        <p class="text-2xs"><a class="source-link" href="https://link.springer.com/article/10.1007/s00265-006-0162-8" target="_blank">Behavioral Ecology and Sociobiology, 2006</a></p>
+        <p class="mt-1.5"><strong class="text-stone-900">Yen et al. (2018)</strong> — Genomische Studie in Singapur. Bestätigt die Basler Ergebnisse: genetische Patchgröße ~3 km, 92,5% suchten innerhalb von 2 km nach Nahrung.</p>
+        <p class="text-2xs"><a class="source-link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6183452/" target="_blank">PMC/NIH, 2018</a></p>
+        <p class="mt-1.5"><strong class="text-stone-900">Sol & Senar (1995)</strong> — Home-Range: 1,64 ha. Konsistent als Baseline in moderner Literatur zitiert (z.B. Carlen et al. 2021).</p>
+        <p class="mt-1.5"><strong class="text-stone-900">Giunchi et al. (2012)</strong> — Pendelflüge 3–20 km, aber ländlich/landwirtschaftlich — nicht typisches urbanes Verhalten. 1 km ist bereits großzügig für den städtischen Kontext.</p>
+        <p class="mt-2 text-2xs"><strong class="text-stone-900">Fazit:</strong> 300 m = starke Anbindung, 500 m = mäßig, 1 km = theoretisches Maximum für regelmäßige urbane Nutzung.</p>
       </div>
     </details>
 
     <!-- Quellenverzeichnis -->
-    <details>
+    <details class="section-card">
       <summary>Daten & Quellen</summary>
-      <div class="detail-body">
+      <div class="mt-2 text-sm text-stone-500 leading-relaxed">
         <p>Lokale Daten aus städtischen Dokumenten, Presseberichten und wissenschaftlichen Studien.</p>
-        <p style="margin-top:0.3rem;font-size:0.65rem;font-weight:700;">Stadtverwaltung & Studie:</p>
-        <ul class="source-list">
-          <li><a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan Endbericht (Sep. 2025)</a> — Dr. Martin Boschert & Dr. Alessandra Basso, „Ermittlung von Stadttaubenbeständen in der Innenstadt von Karlsruhe", beauftragt durch Stadt Karlsruhe Ordnungs- und Bürgeramt</li>
-          <li><a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671296.pdf" target="_blank">Informationsvorlage 2025/1019</a> — „Sachstand Stadttauben", Ausschuss für öffentliche Einrichtungen, 27.11.2025</li>
-          <li><a class="source-link" href="https://sitzungskalender.karlsruhe.de/db/ratsinformation/termin-10095" target="_blank">Sitzungskalender Karlsruhe</a> — Öffentlicher Zugang zu beiden Dokumenten</li>
+        <p class="mt-1.5 text-2xs font-bold text-stone-900">Stadtverwaltung & Studie:</p>
+        <ul class="list-none p-0 flex flex-col gap-1 mt-1.5">
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671783.pdf" target="_blank">Bioplan Endbericht (Sep. 2025)</a> — Dr. Martin Boschert & Dr. Alessandra Basso, „Ermittlung von Stadttaubenbeständen in der Innenstadt von Karlsruhe", beauftragt durch Stadt Karlsruhe Ordnungs- und Bürgeramt</li>
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://web1.karlsruhe.de/ris/oparl/bodies/0001/downloadfiles/00671296.pdf" target="_blank">Informationsvorlage 2025/1019</a> — „Sachstand Stadttauben", Ausschuss für öffentliche Einrichtungen, 27.11.2025</li>
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://sitzungskalender.karlsruhe.de/db/ratsinformation/termin-10095" target="_blank">Sitzungskalender Karlsruhe</a> — Öffentlicher Zugang zu beiden Dokumenten</li>
         </ul>
-        <p style="margin-top:0.3rem;font-size:0.65rem;font-weight:700;">Presse & Berichte:</p>
-        <ul class="source-list">
-          <li><a class="source-link" href="https://www.ka-news.de/region/karlsruhe/taubenplage-in-karlsruhe-wird-es-immer-schlimmer-art-1991480" target="_blank">ka-news.de (Okt. 2023)</a> — Turmanzahl, fehlende Populationsdaten</li>
-          <li><a class="source-link" href="https://archive.is/GlMuB" target="_blank">BNN (Feb. 2023)</a> — Kronenplatz-Hotspot, Jubez-Schlag</li>
-          <li><a class="source-link" href="https://www.karlsruhe.de/stadt-rathaus/aktuelles/meldungen/betreuter-taubenschlag-kronenplatz" target="_blank">karlsruhe.de (Feb. 2023)</a> — Offizielle Kronenplatz-Pläne</li>
-          <li><a class="source-link" href="https://meinka.de/stadttaubenkonzept-karlsruher-tauben-muessen-im-lockdown-nicht-hungern/" target="_blank">meinKA (März 2021)</a> — Lockdown-Fütterung, 6 Schläge, Flugradius</li>
-          <li><a class="source-link" href="https://meinka.de/karlsruher-taubenpopulation-wie-laeuft-das-augsburger-modell/" target="_blank">meinKA (Jun. 2020)</a> — GRÜNE-Anfrage, Hotspots, Waldstadt, Budget</li>
-          <li><a class="source-link" href="https://www.karlsruhe-insider.de/news/mit-dieser-idee-soll-karlsruhe-taubenfrei-gehalten-werden-29671/" target="_blank">karlsruhe-insider.de (Jul. 2019)</a> — 380 Eier/Monat, 260→1.100 Tauben</li>
+        <p class="mt-2 text-2xs font-bold text-stone-900">Presse & Berichte:</p>
+        <ul class="list-none p-0 flex flex-col gap-1 mt-1.5">
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://www.ka-news.de/region/karlsruhe/taubenplage-in-karlsruhe-wird-es-immer-schlimmer-art-1991480" target="_blank">ka-news.de (Okt. 2023)</a> — Turmanzahl, fehlende Populationsdaten</li>
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://archive.is/GlMuB" target="_blank">BNN (Feb. 2023)</a> — Kronenplatz-Hotspot, Jubez-Schlag</li>
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://www.karlsruhe.de/stadt-rathaus/aktuelles/meldungen/betreuter-taubenschlag-kronenplatz" target="_blank">karlsruhe.de (Feb. 2023)</a> — Offizielle Kronenplatz-Pläne</li>
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://meinka.de/stadttaubenkonzept-karlsruher-tauben-muessen-im-lockdown-nicht-hungern/" target="_blank">meinKA (März 2021)</a> — Lockdown-Fütterung, 6 Schläge, Flugradius</li>
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://meinka.de/karlsruher-taubenpopulation-wie-laeuft-das-augsburger-modell/" target="_blank">meinKA (Jun. 2020)</a> — GRÜNE-Anfrage, Hotspots, Waldstadt, Budget</li>
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://www.karlsruhe-insider.de/news/mit-dieser-idee-soll-karlsruhe-taubenfrei-gehalten-werden-29671/" target="_blank">karlsruhe-insider.de (Jul. 2019)</a> — 380 Eier/Monat, 260→1.100 Tauben</li>
         </ul>
-        <p style="margin-top:0.5rem;font-size:0.65rem;font-weight:700;">Augsburg-Vergleich:</p>
-        <ul class="source-list">
-          <li><a class="source-link" href="https://www.augsburg.de/umwelt-soziales/umwelt/umweltstadt-augsburg/stadttaubenkonzept" target="_blank">augsburg.de (laufend aktualisiert)</a> — Offizielles Stadttaubenkonzept</li>
-          <li><a class="source-link" href="https://www.tierschutzverein-augsburg.de/ueber-uns/augsburger-stadttauben/" target="_blank">Tierheim Augsburg (Mai 2024)</a> — 12 Schläge/Häuser bestätigt</li>
-          <li><a class="source-link" href="https://www.berlin.de/lb/tierschutz/tauben/artikel.1334323.php" target="_blank">berlin.de / Landestierschutzbeauftragte (Feb. 2023)</a> — 10 Schläge + 2 Türme, 109.400 Eier 2001–2016</li>
-          <li><a class="source-link" href="https://www.staz.de/region/augsburg-stadt/lokales/kraehen-taubenplage-augsburg-id43646.html" target="_blank">StaZ Augsburg (~2020)</a> — 14 Schläge seit 2008, Ei-Zahlen, letzte Zählung 1996</li>
-          <li><a class="source-link" href="https://stadttaubenhilfe-boppard.de/fragen-und-antworten-zu-stadttauben/was-ist-das-augsburger-modell/" target="_blank">Stadttaubenhilfe Boppard</a> — 400m Fütterungsverbot-Radius</li>
+        <p class="mt-2 text-2xs font-bold text-stone-900">Augsburg-Vergleich:</p>
+        <ul class="list-none p-0 flex flex-col gap-1 mt-1.5">
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://www.augsburg.de/umwelt-soziales/umwelt/umweltstadt-augsburg/stadttaubenkonzept" target="_blank">augsburg.de (laufend aktualisiert)</a> — Offizielles Stadttaubenkonzept</li>
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://www.tierschutzverein-augsburg.de/ueber-uns/augsburger-stadttauben/" target="_blank">Tierheim Augsburg (Mai 2024)</a> — 12 Schläge/Häuser bestätigt</li>
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://www.berlin.de/lb/tierschutz/tauben/artikel.1334323.php" target="_blank">berlin.de / Landestierschutzbeauftragte (Feb. 2023)</a> — 10 Schläge + 2 Türme, 109.400 Eier 2001–2016</li>
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://www.staz.de/region/augsburg-stadt/lokales/kraehen-taubenplage-augsburg-id43646.html" target="_blank">StaZ Augsburg (~2020)</a> — 14 Schläge seit 2008, Ei-Zahlen, letzte Zählung 1996</li>
+          <li class="text-sm text-stone-500 leading-snug"><a class="source-link" href="https://stadttaubenhilfe-boppard.de/fragen-und-antworten-zu-stadttauben/was-ist-das-augsburger-modell/" target="_blank">Stadttaubenhilfe Boppard</a> — 400m Fütterungsverbot-Radius</li>
         </ul>
-        <p style="margin-top:0.5rem;font-size:0.6rem;font-style:italic;">Wissenschaftliche Studien siehe „Wissenschaftliche Grundlage" oben.</p>
+        <p class="mt-2 text-2xs italic">Wissenschaftliche Studien siehe „Wissenschaftliche Grundlage" oben.</p>
       </div>
     </details>
 
-    <div class="methodology">
-      <h3>Methodik</h3>
-      <p>Turmkoordinaten aus städtischen Dokumenten. Reichweiten: 300m (stark — Tauben nutzen zuverlässig einen nahen Turm), 500m (mäßig), 1000m (theoretisches Maximum). Flächenabdeckung berechnet gegen ein Polygon der bebauten Stadtfläche. Die Heatmap zeigt Bereiche, die außerhalb des gewählten Radius liegen — je dunkler, desto weiter entfernt vom nächsten Turm.</p>
-      <p style="margin-top:0.3rem">In Augsburg gilt das Fütterungsverbot stadtweit — aber begleitet von 12 betreuten Schlägen, die eine flächendeckende Versorgung sicherstellen. In Karlsruhe gilt dasselbe Verbot bei nur 5 Türmen. <span class="source-tag">(<a class="source-link" href="https://www.augsburg.de/umwelt-soziales/umwelt/umweltstadt-augsburg/stadttaubenkonzept" target="_blank">augsburg.de</a>; <a class="source-link" href="https://www.augsburg.de/fileadmin/user_upload/buergerservice_rathaus/rathaus/stadtrecht/pdf/31/3130.pdf" target="_blank">Verordnung 3130</a>)</span></p>
+    <!-- Methodik -->
+    <div class="section-card">
+      <h3 class="text-xs font-bold text-stone-500 mb-1">Methodik</h3>
+      <p class="text-sm text-stone-500 leading-relaxed">Turmkoordinaten aus städtischen Dokumenten. Reichweiten: 300m (stark — Tauben nutzen zuverlässig einen nahen Turm), 500m (mäßig), 1000m (theoretisches Maximum). Flächenabdeckung berechnet gegen ein Polygon der bebauten Stadtfläche. Die Heatmap zeigt Bereiche, die außerhalb des gewählten Radius liegen — je dunkler, desto weiter entfernt vom nächsten Turm.</p>
+      <p class="text-sm text-stone-500 leading-relaxed mt-1.5">In Augsburg gilt das Fütterungsverbot stadtweit — aber begleitet von 12 betreuten Schlägen, die eine flächendeckende Versorgung sicherstellen. In Karlsruhe gilt dasselbe Verbot bei nur 5 Türmen. <span class="text-2xs">(<a class="source-link" href="https://www.augsburg.de/umwelt-soziales/umwelt/umweltstadt-augsburg/stadttaubenkonzept" target="_blank">augsburg.de</a>; <a class="source-link" href="https://www.augsburg.de/fileadmin/user_upload/buergerservice_rathaus/rathaus/stadtrecht/pdf/31/3130.pdf" target="_blank">Verordnung 3130</a>)</span></p>
     </div>
-    <div style="margin-top:auto;padding-top:1rem;display:flex;justify-content:center;">
-      <a href="https://poweredby.soy" target="_blank" style="opacity:0.35;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=0.35">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 576" style="width:80px;height:auto;" fill="currentColor">
+
+    <!-- Footer -->
+    <div class="mt-auto pt-4 flex justify-center">
+      <a href="https://poweredby.soy" target="_blank" class="opacity-35 transition-opacity hover:opacity-70">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 576" class="w-20 h-auto" fill="currentColor">
           <path d="m91.6 122.2q19.9 0 36 9.6 16.1 9.6 25.4 27.1 9.2 17.2 9.2 39.8 0 22.3-9.9 39.4-10 16.8-27.4 26.1-17.5 9.2-39.1 9.2-15.5 0-29.5-6.5-14.1-6.8-22.6-18.2v133.2q8.9-11.3 24.3-17.8 15.8-6.9 34.6-6.9 19.2 0 35 9.3 16.1 9.2 25.4 26 9.2 16.8 9.2 39.1 0 23.3-9.9 40.8-10 17.5-27.1 26.8-16.8 9.2-36.7 9.2-17.5 0-31.9-6.8-14-6.9-22.9-18.5v21.9h-31.9v-379.3h27.7l2.8 24q11-12.4 26-19.9 15.5-7.6 33.3-7.6zm-12 125.5q13.4 0 24.7-6.2 11.6-6.5 18.5-17.4 6.9-11.4 6.9-25.1 0-14-6.6-25.3-6.1-11.4-17.1-17.9-11-6.5-24.3-6.5-18.2 0-31.2 10.3-12.7 9.9-16.8 27.1v23.6q2.7 16.5 15.4 27.1 13 10.3 30.5 10.3zm85.8-50q0-21 10-38.1 10.3-17.5 28.1-27.4 18.2-10 40.8-10 22.6 0 40.1 10 17.8 9.9 27.4 27.1 10 17.1 10 38.4 0 21.2-10 38.7-9.6 17.1-27.4 27.1-17.8 9.9-40.8 9.9-22.3 0-40.1-9.2-17.8-9.6-28.1-26.8-10-17.1-10-39.7zm32.3 0.3q0 13.4 5.8 24.7 6.2 11.3 16.4 17.8 10.7 6.5 23.4 6.5 19.8 0 32.9-14 13-14.1 13-35 0-20.9-13-35-13.1-14.4-32.9-14.4-13.1 0-23.4 6.9-10.2 6.5-16.4 17.8-5.8 11.3-5.8 24.7zm300.7-69.9h31.5l-65.5 150.5-45.6-97.4-41.5 97.4-65.8-150.5h31.6l38 86 26.4-61.7-11.3-24.3h27.8l38.4 88.1zm100.9 117.9q17.8 0 34.6-12.3l14.8 23.6q-11.4 7.6-24.7 12-13.1 4.1-25.4 4.1-23.7 0-41.5-9.6-17.5-9.9-27.1-27-9.6-17.2-9.6-38.8 0-20.9 10.3-38 10.6-17.5 28.8-27.5 18.2-10.3 39.8-10.3 27.8 0 46.3 16.5 18.8 16.1 25.7 45.3l-112.5 39.4q6.2 10.6 16.5 16.8 10.6 5.8 24 5.8zm-2.4-98.4q-19.6 0-32.2 13.7-12.7 13.7-12.7 35 0 5.1 0.3 7.9l82.6-30.5q-5.1-11.7-14.7-18.9-9.3-7.2-23.3-7.2zm117.7 14.1q5.5-11.7 15.5-20.6 10.2-8.9 21.6-13.7 11.3-4.8 19.8-5.2l-1.3 31.9q-15.5-0.7-28.1 6.2-12.4 6.9-19.6 19.2-6.8 12-6.8 25.7v64.8h-31.9v-141.9h28.4zm131.7 84.3q17.8 0 34.6-12.3l14.8 23.6q-11.4 7.6-24.7 12-13.1 4.1-25.4 4.1-23.7 0-41.5-9.6-17.5-9.9-27.1-27-9.6-17.2-9.6-38.8 0-20.9 10.3-38 10.6-17.5 28.8-27.5 18.2-10.3 39.8-10.3 27.8 0 46.3 16.5 18.8 16.1 25.7 45.2 2-14.9 8.7-26.7 9.6-17.1 26.4-26 16.8-9 38.1-9 16.1 0 30.8 6.9 15.1 6.5 23.7 18.2v-143h31.9v265.7h-32.2v-22.3q-10.3 12-25.4 18.9-14.8 6.8-32.6 6.8-19.9 0-36-9.6-16.1-9.6-25.4-26.7-8.9-17.5-8.9-40.1 0-6.8 0.9-13l-112.5 39.4q6.2 10.6 16.5 16.8 10.6 5.8 24 5.8zm-2.4-98.4q-19.6 0-32.2 13.7-12.7 13.7-12.7 35 0 5.1 0.3 7.9l82.6-30.5q-5.1-11.7-14.7-18.9-9.3-7.2-23.3-7.2zm153.8 98.4q18.5 0 31.2-9.9 13-10 16.8-26.8v-26.7q-4.2-15.4-17.5-25-13.4-10-30.5-10-13.1 0-24 6.5-11 6.2-17.5 17.5-6.5 11-6.5 25 0 13.8 6.5 25.1 6.5 11.3 17.5 17.8 10.9 6.5 24 6.5zm-916 235q20.9 0 34.2-14 13.8-14.1 13.8-35.4 0-13.7-6.6-24.6-6.1-11.4-17.1-17.9-11-6.5-24.3-6.5-17.5 0-30.9 9.6-13 9.3-17.1 24.7v28.8q4.1 15.4 17.1 25.4 13 9.9 30.9 9.9zm201.7-117.9h29.5l-91.6 210.1h-31.5l32.5-73-65.8-137.1h36l46 101.1zm157.5 145q-15.8 0-30.2-5.4-14.1-5.5-23-16.2l13.7-18.5q8.6 8.3 17.9 12.7 9.6 4.5 18.8 4.5 11.3 0 18.5-4.5 7.2-4.4 7.2-13.7 0-7.2-4.4-11.7-4.5-4.4-10.3-6.5-5.5-2-18.9-6.1-36.3-11.7-36.3-41.5 0-17.9 13-30.5 13.4-12.7 37.1-12.7 15 0 26.7 3.7 11.7 3.8 21.6 12l-12.7 19.6q-5.5-5.8-14-9.3-8.3-3.4-15.8-3.7-9.6 0-16.5 4.8-6.8 4.4-6.8 12.3 0 6.5 4.4 11 4.5 4.1 9.3 6.1 4.8 1.8 18.8 6.2 17.5 5.8 27.1 15.1 10 9.3 10 25 0 20.6-14.4 34-14.4 13.3-40.8 13.3zm59.5-75.4q0-20.9 10-38 10.2-17.5 28.1-27.5 18.1-9.9 40.8-9.9 22.6 0 40.1 9.9 17.8 10 27.4 27.1 10 17.2 10 38.4 0 21.3-10 38.8-9.6 17.1-27.4 27-17.8 10-40.8 10-22.3 0-40.1-9.3-17.9-9.6-28.1-26.7-10-17.2-10-39.8zm32.2 0.4q0 13.3 5.9 24.6 6.1 11.4 16.4 17.9 10.7 6.5 23.3 6.5 19.9 0 33-14.1 13-14 13-34.9 0-21-13-35-13.1-14.4-33-14.4-13 0-23.3 6.8-10.3 6.6-16.4 17.9-5.9 11.3-5.9 24.7zm240.8-70h29.4l-91.5 210.2h-31.5l32.5-73-65.8-137.2h36l45.9 101.2z"/>
         </svg>
       </a>
@@ -428,451 +325,6 @@
   </div>
 </div>
 
-<script>
-const TOWERS=[
-  {lat:49.010924967578234,lng:8.386127143611693,name:"Turm West"},
-  {lat:49.01189835923452,lng:8.406438513549588,name:"Turm Mitte-West"},
-  {lat:49.00759741335346,lng:8.398087439992846,name:"Turm Süd-Mitte"},
-  {lat:49.00947898308795,lng:8.419205592852764,name:"Turm Mitte-Ost"},
-  {lat:48.998463819002204,lng:8.474148930061281,name:"Turm Durlach"},
-];
-const HOTSPOTS=[
-  {lat:49.01003920549964,lng:8.394179505229648,name:"Europaplatz",trend:"stable"},
-  {lat:49.00827749510261,lng:8.40990270520203,name:"Kronenplatz",trend:"increasing"},
-  {lat:49.00071730400815,lng:8.426548212118755,name:"Ostring",trend:"declining"},
-];
-const DISCOVERED_HOTSPOTS=[
-  {lat:49.00868244041697,lng:8.399378946018745,name:"St.-Stefan-Kirche"},
-  {lat:48.9935,lng:8.4020,name:"Hauptbahnhof"},
-];
-const URBAN_BOUNDARY=[
-  {lat:49.030,lng:8.340},{lat:49.032,lng:8.380},{lat:49.028,lng:8.420},
-  {lat:49.025,lng:8.450},{lat:49.020,lng:8.470},{lat:49.015,lng:8.490},
-  {lat:49.005,lng:8.500},{lat:48.990,lng:8.495},{lat:48.985,lng:8.475},
-  {lat:48.983,lng:8.450},{lat:48.985,lng:8.420},{lat:48.985,lng:8.390},
-  {lat:48.988,lng:8.360},{lat:48.995,lng:8.340},{lat:49.005,lng:8.335},
-  {lat:49.015,lng:8.335},{lat:49.025,lng:8.338},
-];
-
-const canvas=document.getElementById('map');
-const ctx=canvas.getContext('2d');
-let dpr=window.devicePixelRatio||1;
-
-function lat2y(lat){const s=Math.sin(lat*Math.PI/180);return 0.5-Math.log((1+s)/(1-s))/(4*Math.PI);}
-function lng2x(lng){return(lng+180)/360;}
-
-let mapZoom=14,centerX=lng2x(8.420),centerY=lat2y(49.005),panX=0,panY=0;
-let analysisRadius=500;
-let layers={gap:true,labels:true,hotspots:true};
-
-function worldScale(){return 256*Math.pow(2,mapZoom);}
-function resize(){
-  const r=canvas.parentElement.getBoundingClientRect();
-  canvas.width=r.width*dpr;canvas.height=r.height*dpr;
-  canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';
-}
-function W(){return canvas.width/dpr;}function H(){return canvas.height/dpr;}
-
-function geo(lat,lng){
-  const ws=worldScale();
-  return{x:W()/2+(lng2x(lng)*ws-(centerX*ws+panX)),y:H()/2+(lat2y(lat)*ws-(centerY*ws+panY))};
-}
-function m2px(m){
-  return m/((40075016.686*Math.cos(49.005*Math.PI/180))/worldScale());
-}
-
-// === TILES ===
-const tileCache={};
-const TILE_URL='https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png';
-function getTile(tx,ty,tz){
-  const key=tz+'/'+tx+'/'+ty;
-  if(tileCache[key])return tileCache[key];
-  const img=new Image();img.crossOrigin='anonymous';
-  img.src=TILE_URL.replace('{z}',tz).replace('{x}',tx).replace('{y}',ty);
-  img.onload=()=>{tileCache[key].loaded=true;render();};
-  img.onerror=()=>{tileCache[key].error=true;};
-  tileCache[key]={img,loaded:false,error:false};
-  return tileCache[key];
-}
-function drawTiles(){
-  const ws=worldScale(),cx=centerX*ws+panX,cy=centerY*ws+panY;
-  const tz=Math.max(0,Math.min(19,Math.round(mapZoom)));
-  const tc=Math.pow(2,tz),tws=ws/tc;
-  const left=cx-W()/2,top_=cy-H()/2,right=cx+W()/2,bottom=cy+H()/2;
-  const txMin=Math.floor((left/ws)*tc),txMax=Math.floor((right/ws)*tc);
-  const tyMin=Math.floor((top_/ws)*tc),tyMax=Math.floor((bottom/ws)*tc);
-  for(let tx=txMin;tx<=txMax;tx++){
-    for(let ty=tyMin;ty<=tyMax;ty++){
-      const wtx=((tx%tc)+tc)%tc;
-      if(ty<0||ty>=tc)continue;
-      const tile=getTile(wtx,ty,tz);
-      const sx=W()/2+((tx/tc)*ws-cx),sy=H()/2+((ty/tc)*ws-cy);
-      if(tile.loaded)ctx.drawImage(tile.img,sx,sy,tws+0.5,tws+0.5);
-      else{ctx.fillStyle='#e8e4de';ctx.fillRect(sx,sy,tws+0.5,tws+0.5);}
-    }
-  }
-}
-
-// === HELPERS ===
-function pip(lat,lng,poly){
-  let inside=false;
-  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
-    const yi=poly[i].lat,xi=poly[i].lng,yj=poly[j].lat,xj=poly[j].lng;
-    if((yi>lat)!==(yj>lat)&&lng<(xj-xi)*(lat-yi)/(yj-yi)+xi)inside=!inside;
-  }return inside;
-}
-const D2M_LAT=111320,D2M_LNG=111320*Math.cos(49.005*Math.PI/180);
-
-// Precompute distance grid (doesn't change)
-const GRID_STEP=0.00015;
-const LAT_MIN=48.978,LAT_MAX=49.037,LNG_MIN=8.328,LNG_MAX=8.507;
-const GRID_COLS=Math.ceil((LNG_MAX-LNG_MIN)/GRID_STEP);
-const GRID_ROWS=Math.ceil((LAT_MAX-LAT_MIN)/GRID_STEP);
-let distGrid=null; // Float32Array of min distances
-let inBoundary=null; // Uint8Array
-
-function precomputeDistances(){
-  distGrid=new Float32Array(GRID_ROWS*GRID_COLS);
-  inBoundary=new Uint8Array(GRID_ROWS*GRID_COLS);
-  for(let r=0;r<GRID_ROWS;r++){
-    const lat=LAT_MAX-r*GRID_STEP;
-    for(let c=0;c<GRID_COLS;c++){
-      const lng=LNG_MIN+c*GRID_STEP;
-      const idx=r*GRID_COLS+c;
-      inBoundary[idx]=pip(lat,lng,URBAN_BOUNDARY)?1:0;
-      if(!inBoundary[idx]){distGrid[idx]=0;continue;}
-      let mn=Infinity;
-      for(const t of TOWERS){
-        const dl=(lat-t.lat)*D2M_LAT,dn=(lng-t.lng)*D2M_LNG;
-        const d=Math.sqrt(dl*dl+dn*dn);if(d<mn)mn=d;
-      }
-      distGrid[idx]=mn;
-    }
-  }
-}
-
-// Build heatmap canvas for current radius
-let gapCanvas=null;
-function buildGapCanvas(){
-  gapCanvas=document.createElement('canvas');
-  gapCanvas.width=GRID_COLS;gapCanvas.height=GRID_ROWS;
-  const gctx=gapCanvas.getContext('2d');
-  const imgData=gctx.createImageData(GRID_COLS,GRID_ROWS);
-  const rad=analysisRadius;
-  // Fade distance: how far beyond radius until max intensity
-  const fadeRange=rad*0.3;
-  // Max alpha depends on radius: 300m=stronger (map less visible = more alarming), 1000m=softer
-  const maxAlpha=rad<=300?110:rad<=500?90:70;
-
-  for(let i=0;i<GRID_ROWS*GRID_COLS;i++){
-    const px=i*4;
-    if(!inBoundary[i]){imgData.data[px+3]=0;continue;}
-    const d=distGrid[i];
-    if(d>rad){
-      const beyond=d-rad;
-      const intensity=Math.min(beyond/fadeRange,1);
-      imgData.data[px]=192;   // R
-      imgData.data[px+1]=50;  // G
-      imgData.data[px+2]=40;  // B
-      imgData.data[px+3]=Math.round(intensity*maxAlpha);
-    } else {
-      imgData.data[px+3]=0;
-    }
-  }
-  gctx.putImageData(imgData,0,0);
-}
-
-function calcCoverage(){
-  let covered=0,total=0;
-  // Use the precomputed grid for speed
-  for(let i=0;i<GRID_ROWS*GRID_COLS;i++){
-    if(!inBoundary[i])continue;
-    total++;
-    if(distGrid[i]<=analysisRadius)covered++;
-  }
-  const pct=total>0?covered/total*100:0;
-  document.getElementById('coveredPct').textContent=Math.round(pct)+'%';
-  document.getElementById('gapPct').textContent=Math.round(100-pct)+'%';
-  document.getElementById('radiusLabel').textContent=analysisRadius>=1000?(analysisRadius/1000)+'km':analysisRadius+'m';
-
-}
-
-// === DRAWING ===
-function drawGap(){
-  if(!layers.gap||!gapCanvas)return;
-  const tl=geo(LAT_MAX,LNG_MIN),br=geo(LAT_MIN,LNG_MAX);
-  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  ctx.drawImage(gapCanvas,tl.x,tl.y,br.x-tl.x,br.y-tl.y);
-}
-
-function drawBoundary(){
-  ctx.beginPath();
-  const f=geo(URBAN_BOUNDARY[0].lat,URBAN_BOUNDARY[0].lng);
-  ctx.moveTo(f.x,f.y);
-  for(let i=1;i<URBAN_BOUNDARY.length;i++){const p=geo(URBAN_BOUNDARY[i].lat,URBAN_BOUNDARY[i].lng);ctx.lineTo(p.x,p.y);}
-  ctx.closePath();
-  ctx.strokeStyle='rgba(100,90,80,0.3)';ctx.lineWidth=2;
-  ctx.setLineDash([8,5]);ctx.stroke();ctx.setLineDash([]);
-}
-
-function drawRings(){
-  // Intensity scales: 300m=strongest fill, 1000m=lighter but still clearly visible
-  const fillAlpha=analysisRadius<=300?0.14:analysisRadius<=500?0.08:0.05;
-  const strokeAlpha=analysisRadius<=300?0.6:analysisRadius<=500?0.45:0.35;
-  const strokeWidth=analysisRadius<=300?2:analysisRadius<=500?1.8:1.5;
-
-  for(const t of TOWERS){
-    const p=geo(t.lat,t.lng);
-    const r=m2px(analysisRadius);
-    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(26,138,101,${fillAlpha})`;ctx.fill();
-    ctx.strokeStyle=`rgba(26,138,101,${strokeAlpha})`;
-    ctx.lineWidth=strokeWidth;ctx.stroke();
-  }
-}
-
-function drawTowerMarkers(){
-  for(const t of TOWERS){
-    const p=geo(t.lat,t.lng);
-    ctx.beginPath();ctx.arc(p.x,p.y,9,0,Math.PI*2);
-    ctx.fillStyle='rgba(212,133,30,0.18)';ctx.fill();
-    ctx.strokeStyle='#d4851e';ctx.lineWidth=2;ctx.stroke();
-    ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);
-    ctx.fillStyle='#d4851e';ctx.fill();
-    if(layers.labels){
-      ctx.font='700 11px "DM Sans"';ctx.textAlign='left';
-      ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=3.5;
-      ctx.strokeText(t.name,p.x+13,p.y+4);
-      ctx.fillStyle='#6b4000';ctx.fillText(t.name,p.x+13,p.y+4);
-    }
-  }
-}
-
-function drawHotspots(){
-  if(!layers.hotspots)return;
-  const trendColors={
-    increasing:{fill:'rgba(192,57,43,0.2)',stroke:'#c0392b',dot:'#c0392b',label:'#8a1500'},
-    declining:{fill:'rgba(26,138,101,0.2)',stroke:'#1a8a65',dot:'#1a8a65',label:'#0a5a3a'},
-    stable:{fill:'rgba(107,101,96,0.2)',stroke:'#6b6560',dot:'#6b6560',label:'#4a4540'},
-  };
-  for(const h of HOTSPOTS){
-    const p=geo(h.lat,h.lng);
-    const c=trendColors[h.trend]||trendColors.stable;
-    ctx.beginPath();
-    ctx.moveTo(p.x,p.y-10);ctx.lineTo(p.x-7,p.y+4);ctx.lineTo(p.x+7,p.y+4);ctx.closePath();
-    ctx.fillStyle=c.fill;ctx.fill();
-    ctx.strokeStyle=c.stroke;ctx.lineWidth=1.8;ctx.stroke();
-    ctx.beginPath();ctx.arc(p.x,p.y-1,2.5,0,Math.PI*2);
-    ctx.fillStyle=c.dot;ctx.fill();
-    if(layers.labels){
-      const arrow=h.trend==='increasing'?'↑ ':h.trend==='declining'?'↓ ':'';
-      ctx.font='700 10px "DM Sans"';ctx.textAlign='left';
-      ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=3.5;
-      ctx.strokeText(arrow+h.name,p.x+11,p.y+3);
-      ctx.fillStyle=c.label;ctx.fillText(arrow+h.name,p.x+11,p.y+3);
-    }
-  }
-  // Discovered hotspots — diamond markers
-  for(const h of DISCOVERED_HOTSPOTS){
-    const p=geo(h.lat,h.lng);
-    const s=6;
-    ctx.beginPath();
-    ctx.moveTo(p.x,p.y-s);ctx.lineTo(p.x+s,p.y);ctx.lineTo(p.x,p.y+s);ctx.lineTo(p.x-s,p.y);ctx.closePath();
-    ctx.fillStyle='rgba(107,101,96,0.15)';ctx.fill();
-    ctx.strokeStyle='#6b6560';ctx.lineWidth=1.5;ctx.stroke();
-    ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);
-    ctx.fillStyle='#6b6560';ctx.fill();
-    if(layers.labels){
-      ctx.font='700 10px "DM Sans"';ctx.textAlign='left';
-      ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=3.5;
-      ctx.strokeText(h.name,p.x+10,p.y+3);
-      ctx.fillStyle='#4a4540';ctx.fillText(h.name,p.x+10,p.y+3);
-    }
-  }
-}
-
-function drawScale(){
-  const px=m2px(500);
-  const x=W()-18-px,y=H()-22;
-  ctx.strokeStyle='rgba(60,55,50,0.5)';ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+px,y);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(x,y-3);ctx.lineTo(x,y+3);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(x+px,y-3);ctx.lineTo(x+px,y+3);ctx.stroke();
-  ctx.font='500 9px "DM Sans"';ctx.fillStyle='rgba(60,55,50,0.6)';
-  ctx.textAlign='center';ctx.fillText('500m',x+px/2,y-7);
-}
-
-// === USER LOCATION ===
-let userLoc=null;
-function drawUserLocation(){
-  if(!userLoc)return;
-  const p=geo(userLoc.lat,userLoc.lng);
-  // Distance to nearest tower
-  let minDist=Infinity;
-  for(const t of TOWERS){
-    const dl=(userLoc.lat-t.lat)*D2M_LAT,dn=(userLoc.lng-t.lng)*D2M_LNG;
-    const d=Math.sqrt(dl*dl+dn*dn);if(d<minDist)minDist=d;
-  }
-  const covered=minDist<=analysisRadius;
-  const color=covered?'#1a8a65':'#c0392b';
-  // Pulse ring
-  ctx.beginPath();ctx.arc(p.x,p.y,14,0,Math.PI*2);
-  ctx.fillStyle=color+'30';ctx.fill();
-  // Dot
-  ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);
-  ctx.fillStyle=color;ctx.fill();
-  ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.stroke();
-  // Label
-  const distText=minDist>=1000?(minDist/1000).toFixed(1)+'km':Math.round(minDist)+'m';
-  const label=covered?'Im Versorgungsbereich ('+distText+')':'Außerhalb ('+distText+' zum nächsten Turm)';
-  const banner=document.getElementById('locBanner');
-  banner.style.display='block';
-  banner.style.borderColor=color;
-  banner.innerHTML=covered
-    ?'<strong style="color:#1a8a65">✓ Im Versorgungsbereich</strong><br>'+distText+' zum nächsten Turm.'
-    :'<strong style="color:#c0392b">✗ Keine Turmversorgung</strong><br>'+distText+' zum nächsten Turm. Kein betreuter Schlag in Reichweite.';
-}
-
-// === RENDER ===
-let rq=false;
-function render(){
-  if(rq)return;rq=true;
-  requestAnimationFrame(()=>{
-    rq=false;
-    ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.clearRect(0,0,W(),H());
-    drawTiles();drawGap();drawBoundary();drawRings();drawHotspots();drawTowerMarkers();drawUserLocation();drawScale();
-    ctx.restore();
-  });
-}
-
-// === INTERACTION ===
-let dragging=false,dsx=0,dsy=0,dspx=0,dspy=0;
-let touches={},pinchDist0=null,pinchZoom0=null,pinchMid0=null,pinchPanX0=null,pinchPanY0=null;
-
-canvas.addEventListener('touchstart',e=>{
-  if(e.target!==canvas)return;
-  e.preventDefault();
-  for(const t of e.changedTouches)touches[t.identifier]={x:t.clientX,y:t.clientY};
-  const ids=Object.keys(touches);
-  if(ids.length===1){
-    const t=touches[ids[0]];
-    dragging=true;dsx=t.x;dsy=t.y;dspx=panX;dspy=panY;
-  } else if(ids.length===2){
-    const a=touches[ids[0]],b=touches[ids[1]];
-    pinchDist0=Math.hypot(b.x-a.x,b.y-a.y);
-    pinchZoom0=mapZoom;pinchPanX0=panX;pinchPanY0=panY;
-    pinchMid0={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
-    dragging=false;
-  }
-},{passive:false});
-
-canvas.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  for(const t of e.changedTouches)if(touches[t.identifier])touches[t.identifier]={x:t.clientX,y:t.clientY};
-  const ids=Object.keys(touches);
-  if(ids.length===1){
-    const t=touches[ids[0]];
-    if(dragging){panX=dspx-(t.x-dsx);panY=dspy-(t.y-dsy);render();}
-  } else if(ids.length===2&&pinchDist0){
-    const a=touches[ids[0]],b=touches[ids[1]];
-    const dist=Math.hypot(b.x-a.x,b.y-a.y);
-    const scale=dist/pinchDist0;
-    const nz=Math.max(12,Math.min(17,pinchZoom0+Math.log2(scale)));
-    const rect=canvas.getBoundingClientRect();
-    const mx=pinchMid0.x-rect.left,my=pinchMid0.y-rect.top;
-    const ws1=256*Math.pow(2,pinchZoom0),ws2=256*Math.pow(2,nz);
-    panX=(centerX*ws1+pinchPanX0+(mx-W()/2))*ws2/ws1-centerX*ws2-(mx-W()/2);
-    panY=(centerY*ws1+pinchPanY0+(my-H()/2))*ws2/ws1-centerY*ws2-(my-H()/2);
-    mapZoom=nz;render();
-  }
-},{passive:false});
-
-canvas.addEventListener('touchend',e=>{
-  for(const t of e.changedTouches)delete touches[t.identifier];
-  pinchDist0=null;
-},{passive:false});
-
-canvas.addEventListener('pointerdown',e=>{
-  if(e.pointerType==='touch')return;
-  dragging=true;dsx=e.clientX;dsy=e.clientY;dspx=panX;dspy=panY;
-  canvas.setPointerCapture(e.pointerId);e.preventDefault();
-});
-canvas.addEventListener('pointermove',e=>{
-  if(e.pointerType==='touch'||!dragging)return;
-  panX=dspx-(e.clientX-dsx);panY=dspy-(e.clientY-dsy);render();
-});
-canvas.addEventListener('pointerup',e=>{if(e.pointerType!=='touch'){dragging=false;canvas.releasePointerCapture(e.pointerId);}});
-
-canvas.addEventListener('wheel',e=>{
-  e.preventDefault();
-  const rect=canvas.getBoundingClientRect();
-  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
-  const ws1=worldScale();
-  const delta=e.deltaY>0?-0.3:0.3;
-  const nz=Math.max(12,Math.min(17,mapZoom+delta));
-  const ws2=256*Math.pow(2,nz),scale=ws2/ws1;
-  panX=(centerX*ws1+panX+(mx-W()/2))*scale-centerX*ws2-(mx-W()/2);
-  panY=(centerY*ws1+panY+(my-H()/2))*scale-centerY*ws2-(my-H()/2);
-  mapZoom=nz;render();
-},{passive:false});
-
-function zoomBy(f){
-  const ws1=worldScale(),wc={x:centerX*ws1+panX,y:centerY*ws1+panY};
-  mapZoom=Math.max(12,Math.min(17,mapZoom+f));
-  const ws2=worldScale();
-  panX=wc.x/ws1*ws2-centerX*ws2;panY=wc.y/ws1*ws2-centerY*ws2;render();
-}
-document.getElementById('zoomIn').onclick=()=>zoomBy(0.5);
-document.getElementById('zoomOut').onclick=()=>zoomBy(-0.5);
-document.getElementById('resetView').onclick=()=>{mapZoom=14;panX=0;panY=0;render();};
-document.getElementById('locateMe').onclick=()=>{
-  const banner=document.getElementById('locBanner');
-  if(!navigator.geolocation){
-    banner.style.display='block';
-    banner.innerHTML='Geolocation wird von diesem Browser nicht unterstützt.';
-    return;
-  }
-  banner.style.display='block';
-  banner.innerHTML='Standort wird ermittelt…';
-  navigator.geolocation.getCurrentPosition(pos=>{
-    userLoc={lat:pos.coords.latitude,lng:pos.coords.longitude};
-    const ws=worldScale();
-    panX=lng2x(userLoc.lng)*ws-centerX*ws;
-    panY=lat2y(userLoc.lat)*ws-centerY*ws;
-    mapZoom=15;render();
-  },err=>{
-    banner.style.display='block';
-    const msgs={1:'Standortzugriff verweigert. Bitte in den Einstellungen erlauben.',2:'Standort nicht verfügbar.',3:'Zeitüberschreitung.'};
-    banner.innerHTML=msgs[err.code]||'Fehler '+err.code+': '+err.message;
-  },{enableHighAccuracy:true,timeout:10000});
-};
-
-// Simplified toggles
-['togGap','togLabels','togHotspots'].forEach(id=>{
-  const k={togGap:'gap',togLabels:'labels',togHotspots:'hotspots'}[id];
-  document.getElementById(id).onchange=e=>{layers[k]=e.target.checked;render();};
-});
-
-// Radius buttons — now control everything
-document.querySelectorAll('.radius-btn').forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll('.radius-btn').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    analysisRadius=parseInt(b.dataset.r);
-    buildGapCanvas(); // rebuild heatmap for new radius
-    calcCoverage();
-    render();
-  };
-});
-
-// Init
-window.addEventListener('resize',()=>{dpr=window.devicePixelRatio||1;resize();render();});
-resize();
-precomputeDistances();
-buildGapCanvas();
-calcCoverage();
-render();
-</script>
+<script src="app.js"></script>
 </body>
 </html>

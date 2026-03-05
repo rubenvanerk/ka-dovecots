@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@source "..";
+
+@theme {
+  --font-sans: 'DM Sans', sans-serif;
+  --font-serif: 'DM Serif Display', serif;
+  --text-2xs: 0.625rem;
+}
+
+/* Reusable components */
+.source-link {
+  @apply text-2xs text-stone-500 no-underline border-b border-dotted border-stone-300 hover:text-orange-700 hover:border-orange-700;
+}
+
+.overlay-panel {
+  @apply absolute bg-white/93 backdrop-blur-sm border border-stone-300 rounded-lg px-3 py-2 text-xs shadow-sm flex flex-col gap-1;
+}
+
+.map-btn {
+  @apply bg-white border border-stone-300 text-stone-900 size-8 rounded-md text-base cursor-pointer flex items-center justify-center shadow-sm transition-colors hover:bg-stone-100 focus-visible:ring-2 focus-visible:ring-orange-700/50;
+}
+
+.radius-btn {
+  @apply bg-stone-100 border border-stone-300 text-stone-500 px-2.5 py-1 rounded text-xs cursor-pointer transition-all font-sans hover:border-stone-500 hover:text-stone-900 focus-visible:ring-2 focus-visible:ring-orange-700/50;
+}
+.radius-btn.active {
+  @apply border-orange-700 text-orange-700 bg-orange-700/5 font-bold;
+}
+
+.stat-card {
+  @apply bg-stone-100 border border-stone-300 rounded-lg px-3 py-2 min-w-28;
+}
+
+.study-row {
+  @apply grid grid-cols-[1fr_auto_auto] gap-x-1.5 items-center text-sm px-2 py-0.5;
+}
+
+.section-card {
+  @apply bg-stone-100 border border-stone-300 rounded-lg p-3;
+}
+
+.fact-row {
+  @apply text-sm leading-snug text-stone-500;
+}
+
+/* Canvas interaction */
+canvas#map {
+  touch-action: none;
+}
+canvas#map:active {
+  cursor: grabbing;
+}
+
+/* Details/summary chevron */
+.sidebar details summary {
+  @apply list-none text-sm font-bold cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-orange-700/50 rounded;
+}
+.sidebar details summary::-webkit-details-marker {
+  display: none;
+}
+.sidebar details summary::before {
+  content: '\25B8';
+  font-size: 0.76rem;
+  color: theme(--color-stone-500);
+  transition: transform 0.15s;
+}
+.sidebar details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+/* Kern-list arrows */
+.kern-list li {
+  @apply text-sm leading-relaxed text-stone-500 pl-3.5 relative;
+}
+.kern-list li::before {
+  content: '\2192';
+  position: absolute;
+  left: 0;
+  color: theme(--color-orange-700);
+  font-weight: 700;
+}
