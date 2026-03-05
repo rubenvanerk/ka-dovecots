@@ -102,6 +102,29 @@
   .methodology h3{font-size:0.7rem;font-weight:700;color:var(--text-muted);margin-bottom:0.25rem;}
   .methodology p{font-size:0.65rem;color:var(--text-muted);line-height:1.5;}
   .radius-label{font-size:0.62rem;color:var(--text-muted);margin-top:0.4rem;margin-bottom:0.15rem;}
+  .legend-triangle{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid var(--hotspot);flex-shrink:0;}
+  :root{--hotspot:#e25822;}
+  .source-link{font-size:0.6rem;color:var(--text-muted);text-decoration:none;border-bottom:1px dotted var(--border);}
+  .source-link:hover{color:var(--accent);border-color:var(--accent);}
+  .source-tag{font-size:0.58rem;color:var(--text-muted);}
+  .stale-tag{font-size:0.56rem;color:#a08060;font-style:italic;}
+  .sidebar details{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.75rem;}
+  .sidebar details summary{font-size:0.78rem;font-weight:700;cursor:pointer;list-style:none;display:flex;align-items:center;gap:0.4rem;}
+  .sidebar details summary::-webkit-details-marker{display:none;}
+  .sidebar details summary::before{content:'▸';font-size:0.7rem;color:var(--text-muted);transition:transform 0.15s;}
+  .sidebar details[open] summary::before{transform:rotate(90deg);}
+  .sidebar details .detail-body{margin-top:0.5rem;font-size:0.68rem;color:var(--text-muted);line-height:1.55;}
+  .sidebar details .detail-body p{margin-bottom:0.4rem;}
+  .sidebar details .detail-body ul{padding-left:1.1rem;margin-bottom:0.4rem;}
+  .sidebar details .detail-body li{margin-bottom:0.25rem;}
+  .fact-grid{display:flex;flex-direction:column;gap:0.5rem;margin-top:0.35rem;}
+  .fact-row{font-size:0.68rem;line-height:1.45;color:var(--text-muted);}
+  .fact-label{font-weight:700;color:var(--text);}
+  .kern-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:0.5rem;}
+  .kern-list li{font-size:0.72rem;line-height:1.5;color:var(--text-muted);padding-left:0.9rem;position:relative;}
+  .kern-list li::before{content:'→';position:absolute;left:0;color:var(--accent);font-weight:700;}
+  .source-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:0.3rem;margin-top:0.35rem;}
+  .source-list li{font-size:0.62rem;color:var(--text-muted);line-height:1.45;}
 </style>
 <script async src="https://plausible.poweredby.soy/js/pa-fG5WecfpzN9iivmvL3tnp.js"></script>
 <script>
@@ -133,11 +156,13 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--covered)"></div><span>Abdeckungsradius</span></div>
       <div class="legend-item"><div class="legend-dot" style="background:rgba(192,57,43,0.3)"></div><span>Versorgungslücke</span></div>
       <div class="legend-item"><div class="legend-diamond" style="background:var(--suggested)"></div><span>Vorgeschlagen <span class="ai-badge">KI</span></span></div>
+      <div class="legend-item"><div class="legend-triangle"></div><span>Bekannter Hotspot</span></div>
     </div>
 
     <div class="overlay-panel controls-panel">
       <label class="toggle-row"><input type="checkbox" id="togGap" checked> Lücken-Heatmap</label>
       <label class="toggle-row"><input type="checkbox" id="togSuggested"> Vorschläge <span class="ai-badge">KI</span></label>
+      <label class="toggle-row"><input type="checkbox" id="togHotspots" checked> Bekannte Hotspots</label>
       <label class="toggle-row"><input type="checkbox" id="togLabels" checked> Beschriftung</label>
       <div class="radius-label">Analyse-Radius:</div>
       <div class="radius-control">
@@ -165,6 +190,17 @@
   </div>
 
   <div class="sidebar">
+    <!-- Kernargumente -->
+    <div class="cta" style="text-align:left;">
+      <h3 style="text-align:left;margin-bottom:0.5rem;">Kernargumente</h3>
+      <ul class="kern-list">
+        <li><strong>Keine Populationsdaten:</strong> Die Stadt hat keine wissenschaftlichen Zählungen durchgeführt — ein Fütterungsverbot ohne Datengrundlage. <span class="source-tag">(<a class="source-link" href="https://www.ka-news.de/region/karlsruhe/taubenplage-in-karlsruhe-wird-es-immer-schlimmer-art-1991480" target="_blank">ka-news, 2023</a>)</span></li>
+        <li><strong>Minimales Budget:</strong> 12.000 €/Jahr für eine Stadt mit 310.000 Einwohnern <span class="stale-tag">(Stand: 2020, möglicherweise aktualisiert)</span> — ca. 0,04 € pro Einwohner pro Jahr. <span class="source-tag">(<a class="source-link" href="https://meinka.de/karlsruher-taubenpopulation-wie-laeuft-das-augsburger-modell/" target="_blank">meinKA, 2020</a>)</span></li>
+        <li><strong>Hotspots ohne Türme:</strong> Die Stadt hat Kronenplatz offiziell als Hotspot mit kritischer Populationsdichte anerkannt und 2023 einen Taubenschlag diskutiert — drei Jahre später existiert er immer noch nicht. Auch Europaplatz und Ostring bleiben ohne Turm. <span class="source-tag">(<a class="source-link" href="https://archive.is/GlMuB" target="_blank">BNN, 2023</a>; <a class="source-link" href="https://meinka.de/karlsruher-taubenpopulation-wie-laeuft-das-augsburger-modell/" target="_blank">meinKA, 2020</a>; Ortskenntnis, März 2026)</span></li>
+        <li><strong>Wissenschaftliche Reichweite:</strong> 92,5% der Stadttauben fliegen weniger als 2 km und ein Drittel bleibt innerhalb von 300 m (Rose et al. 2006, bestätigt durch Yen et al. 2018). Türme müssen nah sein, um zu wirken.</li>
+      </ul>
+    </div>
+
     <div>
       <h2>Kritische Versorgungslücken</h2>
       <div style="display:flex;flex-direction:column;gap:0.5rem">
@@ -191,6 +227,62 @@
       <h3>5 Türme schützen nur einen Bruchteil.</h3>
       <p>Ein Fütterungsverbot ohne ausreichende Turminfrastruktur zwingt die Mehrheit der Karlsruher Stadttauben zum Hungern — nicht weil sie keine Türme nutzen würden, sondern weil es keine Türme für sie gibt.</p>
     </div>
+    <!-- Karlsruhe Fakten -->
+    <details>
+      <summary>Karlsruhe Fakten</summary>
+      <div class="detail-body">
+        <div class="fact-grid">
+          <div class="fact-row"><span class="fact-label">Aktive Türme:</span> 5 Taubenschläge/-türme (Mühlburger Tor, Blumenstraße 2a, Schlossplatz, B36/Lindenallee, Heinrich-Meidinger-Schule), plus ein weiterer in der Durlacher Karlsburg in Einrichtung <span class="source-tag">(<a class="source-link" href="https://www.ka-news.de/region/karlsruhe/taubenplage-in-karlsruhe-wird-es-immer-schlimmer-art-1991480" target="_blank">ka-news, 2023</a>)</span></div>
+          <div class="fact-row"><span class="fact-label">Betreute Tauben:</span> Bestand wuchs von 260 (Nov. 2018) auf über 1.100 <span class="stale-tag">(Stand: 2019, möglicherweise veraltet)</span> <span class="source-tag">(<a class="source-link" href="https://www.karlsruhe-insider.de/news/mit-dieser-idee-soll-karlsruhe-taubenfrei-gehalten-werden-29671/" target="_blank">karlsruhe-insider, 2019</a>)</span></div>
+          <div class="fact-row"><span class="fact-label">Eieraustausch:</span> ~380 Eier/Monat durch Gipsattrappen ersetzt <span class="stale-tag">(Stand: 2019, möglicherweise veraltet)</span> <span class="source-tag">(<a class="source-link" href="https://www.karlsruhe-insider.de/news/mit-dieser-idee-soll-karlsruhe-taubenfrei-gehalten-werden-29671/" target="_blank">karlsruhe-insider, 2019</a>)</span></div>
+          <div class="fact-row"><span class="fact-label">Budget:</span> Bis zu 12.000 €/Jahr städtisches Budget <span class="stale-tag">(Stand: 2020, möglicherweise aktualisiert)</span> <span class="source-tag">(<a class="source-link" href="https://meinka.de/karlsruher-taubenpopulation-wie-laeuft-das-augsburger-modell/" target="_blank">meinKA, 2020</a>)</span></div>
+          <div class="fact-row"><span class="fact-label">Populationsdaten:</span> Keine regelmäßigen, wissenschaftlich genauen Zählungen <span class="source-tag">(<a class="source-link" href="https://www.ka-news.de/region/karlsruhe/taubenplage-in-karlsruhe-wird-es-immer-schlimmer-art-1991480" target="_blank">ka-news, 2023</a>)</span></div>
+          <div class="fact-row"><span class="fact-label">Hotspots:</span> Europaplatz, Kronenplatz, Ostring/Wolfartsweierer Str. — von der Stadt identifiziert <span class="source-tag">(<a class="source-link" href="https://meinka.de/karlsruher-taubenpopulation-wie-laeuft-das-augsburger-modell/" target="_blank">meinKA, 2020</a>)</span></div>
+          <div class="fact-row"><span class="fact-label">Kronenplatz:</span> Von der Stadt als Hotspot mit „kritischer Populationsdichte" anerkannt (2023). Taubenschlag auf dem Jubez-Dach wurde im Ausschuss diskutiert, aber bis heute nicht umgesetzt. <span class="source-tag">(<a class="source-link" href="https://archive.is/GlMuB" target="_blank">BNN, 2023</a>; Ortskenntnis, März 2026)</span></div>
+          <div class="fact-row"><span class="fact-label">Waldstadt:</span> ~350 Tauben aus dem Waldstadtzentrum umgesiedelt <span class="source-tag">(<a class="source-link" href="https://meinka.de/karlsruher-taubenpopulation-wie-laeuft-das-augsburger-modell/" target="_blank">meinKA, 2020</a>)</span></div>
+          <div class="fact-row"><span class="fact-label">Tierschutzpreis:</span> Stadttaubenkonzept Karlsruhe e.V. erhielt 2019 den Tierschutzpreis Baden-Württemberg</div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Wissenschaftliche Grundlage der Radien -->
+    <details>
+      <summary>Wissenschaftliche Grundlage der Radien</summary>
+      <div class="detail-body">
+        <p>Die Analyse-Radien (300 m / 500 m / 1 km) basieren auf der publizierten Forschung zum Raumverhalten von Stadttauben:</p>
+        <p><strong>Rose, Nagel & Haag-Wackernagel (2006)</strong> — GPS-Tracking verwilderter Stadttauben in Basel. Standardreferenz für urbanes Tauben-Raumverhalten, bis heute in aktuellen Publikationen zitiert und nicht widerlegt.</p>
+        <ul>
+          <li>32% blieben innerhalb von 300 m ihres Schlags</li>
+          <li>Mittlere tägliche Bewegung: ~590 m</li>
+          <li>Nur 7,5% flogen weiter als 2 km</li>
+          <li>Weibchen legten größere Distanzen zurück</li>
+        </ul>
+        <p style="font-size:0.6rem;"><a class="source-link" href="https://link.springer.com/article/10.1007/s00265-006-0162-8" target="_blank">Behavioral Ecology and Sociobiology, 2006</a></p>
+        <p><strong>Yen et al. (2018)</strong> — Genomische Studie in Singapur. Bestätigt die Basler Ergebnisse: genetische Patchgröße ~3 km, 92,5% suchten innerhalb von 2 km nach Nahrung.</p>
+        <p style="font-size:0.6rem;"><a class="source-link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6183452/" target="_blank">PMC/NIH, 2018</a></p>
+        <p><strong>Sol & Senar (1995)</strong> — Home-Range: 1,64 ha. Konsistent als Baseline in moderner Literatur zitiert (z.B. Carlen et al. 2021).</p>
+        <p><strong>Giunchi et al. (2012)</strong> — Pendelflüge 3–20 km, aber ländlich/landwirtschaftlich — nicht typisches urbanes Verhalten. 1 km ist bereits großzügig für den städtischen Kontext.</p>
+        <p style="margin-top:0.5rem;font-size:0.65rem;"><strong>Fazit:</strong> 300 m = starke Anbindung, 500 m = mäßig, 1 km = theoretisches Maximum für regelmäßige urbane Nutzung.</p>
+      </div>
+    </details>
+
+    <!-- Quellenverzeichnis -->
+    <details>
+      <summary>Daten & Quellen</summary>
+      <div class="detail-body">
+        <p>Lokale Daten aus Presseberichten und städtischen Veröffentlichungen. Ältere Quellen entsprechend markiert.</p>
+        <ul class="source-list">
+          <li><a class="source-link" href="https://www.ka-news.de/region/karlsruhe/taubenplage-in-karlsruhe-wird-es-immer-schlimmer-art-1991480" target="_blank">ka-news.de (Okt. 2023)</a> — Turmanzahl, fehlende Populationsdaten</li>
+          <li><a class="source-link" href="https://archive.is/GlMuB" target="_blank">BNN (Feb. 2023)</a> — Kronenplatz-Hotspot, Jubez-Schlag</li>
+          <li><a class="source-link" href="https://www.karlsruhe.de/stadt-rathaus/aktuelles/meldungen/betreuter-taubenschlag-kronenplatz" target="_blank">karlsruhe.de (Feb. 2023)</a> — Offizielle Kronenplatz-Pläne</li>
+          <li><a class="source-link" href="https://meinka.de/stadttaubenkonzept-karlsruher-tauben-muessen-im-lockdown-nicht-hungern/" target="_blank">meinKA (März 2021)</a> — Lockdown-Fütterung, 6 Schläge, Flugradius</li>
+          <li><a class="source-link" href="https://meinka.de/karlsruher-taubenpopulation-wie-laeuft-das-augsburger-modell/" target="_blank">meinKA (Jun. 2020)</a> — GRÜNE-Anfrage, Hotspots, Waldstadt, Budget</li>
+          <li><a class="source-link" href="https://www.karlsruhe-insider.de/news/mit-dieser-idee-soll-karlsruhe-taubenfrei-gehalten-werden-29671/" target="_blank">karlsruhe-insider.de (Jul. 2019)</a> — 380 Eier/Monat, 260→1.100 Tauben</li>
+        </ul>
+        <p style="margin-top:0.5rem;font-size:0.6rem;font-style:italic;">Wissenschaftliche Studien siehe „Wissenschaftliche Grundlage" oben.</p>
+      </div>
+    </details>
+
     <div class="methodology">
       <h3>Methodik</h3>
       <p>Turmkoordinaten von lokalen Tierschützern. Reichweiten: 300m (stark — Tauben nutzen zuverlässig einen nahen Turm), 500m (mäßig), 1000m (theoretisches Maximum). Flächenabdeckung berechnet gegen ein Polygon der bebauten Stadtfläche. Die Heatmap zeigt Bereiche, die außerhalb des gewählten Radius liegen — je dunkler, desto weiter entfernt vom nächsten Turm.</p>
@@ -221,6 +313,11 @@ const SUGGESTED=[
   {lat:49.020,lng:8.395,name:"D — Nordwest"},
   {lat:48.993,lng:8.462,name:"E — S. Durlach"},
 ];
+const HOTSPOTS=[
+  {lat:49.01003920549964,lng:8.394179505229648,name:"Europaplatz"},
+  {lat:49.00827749510261,lng:8.40990270520203,name:"Kronenplatz"},
+  {lat:49.00071730400815,lng:8.426548212118755,name:"Ostring"},
+];
 const URBAN_BOUNDARY=[
   {lat:49.030,lng:8.340},{lat:49.032,lng:8.380},{lat:49.028,lng:8.420},
   {lat:49.025,lng:8.450},{lat:49.020,lng:8.470},{lat:49.015,lng:8.490},
@@ -239,7 +336,7 @@ function lng2x(lng){return(lng+180)/360;}
 
 let mapZoom=14,centerX=lng2x(8.420),centerY=lat2y(49.005),panX=0,panY=0;
 let analysisRadius=500;
-let layers={gap:true,suggested:false,labels:true};
+let layers={gap:true,suggested:false,labels:true,hotspots:true};
 
 function worldScale(){return 256*Math.pow(2,mapZoom);}
 function resize(){
@@ -454,6 +551,27 @@ function drawSuggested(){
   }
 }
 
+function drawHotspots(){
+  if(!layers.hotspots)return;
+  for(const h of HOTSPOTS){
+    const p=geo(h.lat,h.lng);
+    // Triangle marker
+    ctx.beginPath();
+    ctx.moveTo(p.x,p.y-10);ctx.lineTo(p.x-7,p.y+4);ctx.lineTo(p.x+7,p.y+4);ctx.closePath();
+    ctx.fillStyle='rgba(226,88,34,0.2)';ctx.fill();
+    ctx.strokeStyle='#e25822';ctx.lineWidth=1.8;ctx.stroke();
+    // Inner dot
+    ctx.beginPath();ctx.arc(p.x,p.y-1,2.5,0,Math.PI*2);
+    ctx.fillStyle='#e25822';ctx.fill();
+    if(layers.labels){
+      ctx.font='700 10px "DM Sans"';ctx.textAlign='left';
+      ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=3.5;
+      ctx.strokeText(h.name,p.x+11,p.y+3);
+      ctx.fillStyle='#8a2800';ctx.fillText(h.name,p.x+11,p.y+3);
+    }
+  }
+}
+
 function drawScale(){
   const px=m2px(500);
   const x=W()-18-px,y=H()-22;
@@ -504,7 +622,7 @@ function render(){
     rq=false;
     ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,W(),H());
-    drawTiles();drawGap();drawBoundary();drawRings();drawSuggested();drawTowerMarkers();drawUserLocation();drawScale();
+    drawTiles();drawGap();drawBoundary();drawRings();drawSuggested();drawHotspots();drawTowerMarkers();drawUserLocation();drawScale();
     ctx.restore();
   });
 }
@@ -612,8 +730,8 @@ document.getElementById('locateMe').onclick=()=>{
 };
 
 // Simplified toggles
-['togGap','togSuggested','togLabels'].forEach(id=>{
-  const k={togGap:'gap',togSuggested:'suggested',togLabels:'labels'}[id];
+['togGap','togSuggested','togLabels','togHotspots'].forEach(id=>{
+  const k={togGap:'gap',togSuggested:'suggested',togLabels:'labels',togHotspots:'hotspots'}[id];
   document.getElementById(id).onchange=e=>{layers[k]=e.target.checked;render();};
 });
 
