@@ -510,15 +510,60 @@ function render(){
 
 // === INTERACTION ===
 let dragging=false,dsx=0,dsy=0,dspx=0,dspy=0;
+let touches={},pinchDist0=null,pinchZoom0=null,pinchMid0=null,pinchPanX0=null,pinchPanY0=null;
+
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  for(const t of e.changedTouches)touches[t.identifier]={x:t.clientX,y:t.clientY};
+  const ids=Object.keys(touches);
+  if(ids.length===1){
+    const t=touches[ids[0]];
+    dragging=true;dsx=t.x;dsy=t.y;dspx=panX;dspy=panY;
+  } else if(ids.length===2){
+    const a=touches[ids[0]],b=touches[ids[1]];
+    pinchDist0=Math.hypot(b.x-a.x,b.y-a.y);
+    pinchZoom0=mapZoom;pinchPanX0=panX;pinchPanY0=panY;
+    pinchMid0={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+    dragging=false;
+  }
+},{passive:false});
+
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  for(const t of e.changedTouches)if(touches[t.identifier])touches[t.identifier]={x:t.clientX,y:t.clientY};
+  const ids=Object.keys(touches);
+  if(ids.length===1){
+    const t=touches[ids[0]];
+    if(dragging){panX=dspx-(t.x-dsx);panY=dspy-(t.y-dsy);render();}
+  } else if(ids.length===2&&pinchDist0){
+    const a=touches[ids[0]],b=touches[ids[1]];
+    const dist=Math.hypot(b.x-a.x,b.y-a.y);
+    const scale=dist/pinchDist0;
+    const nz=Math.max(12,Math.min(17,pinchZoom0+Math.log2(scale)));
+    const rect=canvas.getBoundingClientRect();
+    const mx=pinchMid0.x-rect.left,my=pinchMid0.y-rect.top;
+    const ws1=256*Math.pow(2,pinchZoom0),ws2=256*Math.pow(2,nz);
+    panX=(centerX*ws1+pinchPanX0+(mx-W()/2))*ws2/ws1-centerX*ws2-(mx-W()/2);
+    panY=(centerY*ws1+pinchPanY0+(my-H()/2))*ws2/ws1-centerY*ws2-(my-H()/2);
+    mapZoom=nz;render();
+  }
+},{passive:false});
+
+canvas.addEventListener('touchend',e=>{
+  for(const t of e.changedTouches)delete touches[t.identifier];
+  pinchDist0=null;
+},{passive:false});
+
 canvas.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch')return;
   dragging=true;dsx=e.clientX;dsy=e.clientY;dspx=panX;dspy=panY;
   canvas.setPointerCapture(e.pointerId);e.preventDefault();
 });
 canvas.addEventListener('pointermove',e=>{
-  if(!dragging)return;
+  if(e.pointerType==='touch'||!dragging)return;
   panX=dspx-(e.clientX-dsx);panY=dspy-(e.clientY-dsy);render();
 });
-canvas.addEventListener('pointerup',e=>{dragging=false;canvas.releasePointerCapture(e.pointerId);});
+canvas.addEventListener('pointerup',e=>{if(e.pointerType!=='touch'){dragging=false;canvas.releasePointerCapture(e.pointerId);}});
 
 canvas.addEventListener('wheel',e=>{
   e.preventDefault();
