@@ -513,6 +513,7 @@ let dragging=false,dsx=0,dsy=0,dspx=0,dspy=0;
 let touches={},pinchDist0=null,pinchZoom0=null,pinchMid0=null,pinchPanX0=null,pinchPanY0=null;
 
 canvas.addEventListener('touchstart',e=>{
+  if(e.target!==canvas)return;
   e.preventDefault();
   for(const t of e.changedTouches)touches[t.identifier]={x:t.clientX,y:t.clientY};
   const ids=Object.keys(touches);
@@ -588,17 +589,25 @@ document.getElementById('zoomIn').onclick=()=>zoomBy(0.5);
 document.getElementById('zoomOut').onclick=()=>zoomBy(-0.5);
 document.getElementById('resetView').onclick=()=>{mapZoom=14;panX=0;panY=0;render();};
 document.getElementById('locateMe').onclick=()=>{
-  if(!navigator.geolocation)return;
+  const banner=document.getElementById('locBanner');
+  if(!navigator.geolocation){
+    banner.style.display='block';
+    banner.innerHTML='Geolocation wird von diesem Browser nicht unterstützt.';
+    return;
+  }
+  banner.style.display='block';
+  banner.innerHTML='Standort wird ermittelt…';
   navigator.geolocation.getCurrentPosition(pos=>{
     userLoc={lat:pos.coords.latitude,lng:pos.coords.longitude};
     const ws=worldScale();
     panX=lng2x(userLoc.lng)*ws-centerX*ws;
     panY=lat2y(userLoc.lat)*ws-centerY*ws;
     mapZoom=15;render();
-  },()=>{
-    document.getElementById('locBanner').style.display='block';
-    document.getElementById('locBanner').innerHTML='Standort konnte nicht ermittelt werden.';
-  });
+  },err=>{
+    banner.style.display='block';
+    const msgs={1:'Standortzugriff verweigert. Bitte in den Einstellungen erlauben.',2:'Standort nicht verfügbar.',3:'Zeitüberschreitung.'};
+    banner.innerHTML=msgs[err.code]||'Fehler '+err.code+': '+err.message;
+  },{enableHighAccuracy:true,timeout:10000});
 };
 
 // Simplified toggles
