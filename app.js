@@ -395,10 +395,11 @@ document.getElementById('locateMe').onclick=()=>{
   banner.innerHTML='Standort wird ermittelt\u2026';
   navigator.geolocation.getCurrentPosition(pos=>{
     userLoc={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    mapZoom=15;
     const ws=worldScale();
     panX=lng2x(userLoc.lng)*ws-centerX*ws;
     panY=lat2y(userLoc.lat)*ws-centerY*ws;
-    mapZoom=15;render();
+    render();
   },err=>{
     banner.style.display='block';
     const msgs={1:'Standortzugriff verweigert. Bitte in den Einstellungen erlauben.',2:'Standort nicht verf\u00fcgbar.',3:'Zeit\u00fcberschreitung.'};
