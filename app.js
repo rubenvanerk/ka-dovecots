@@ -30,9 +30,9 @@ let dpr=window.devicePixelRatio||1;
 function lat2y(lat){const s=Math.sin(lat*Math.PI/180);return 0.5-Math.log((1+s)/(1-s))/(4*Math.PI);}
 function lng2x(lng){return(lng+180)/360;}
 
-let mapZoom=14,centerX=lng2x(8.420),centerY=lat2y(49.005),panX=0,panY=0;
+let mapZoom=window.innerWidth>=768?13:12,centerX=lng2x(8.419),centerY=lat2y(49.013),panX=0,panY=0;
 let analysisRadius=500;
-let layers={gap:true,labels:true,hotspots:true};
+let layers={gap:true,labels:false,hotspots:false};
 
 function worldScale(){return 256*Math.pow(2,mapZoom);}
 function resize(){
@@ -336,7 +336,7 @@ canvas.addEventListener('touchmove',e=>{
     const a=touches[ids[0]],b=touches[ids[1]];
     const dist=Math.hypot(b.x-a.x,b.y-a.y);
     const scale=dist/pinchDist0;
-    const nz=Math.max(12,Math.min(17,pinchZoom0+Math.log2(scale)));
+    const nz=Math.max(10,Math.min(17,pinchZoom0+Math.log2(scale)));
     const rect=canvas.getBoundingClientRect();
     const mx=pinchMid0.x-rect.left,my=pinchMid0.y-rect.top;
     const ws1=256*Math.pow(2,pinchZoom0),ws2=256*Math.pow(2,nz);
@@ -368,7 +368,7 @@ canvas.addEventListener('wheel',e=>{
   const mx=e.clientX-rect.left,my=e.clientY-rect.top;
   const ws1=worldScale();
   const delta=e.deltaY>0?-0.3:0.3;
-  const nz=Math.max(12,Math.min(17,mapZoom+delta));
+  const nz=Math.max(10,Math.min(17,mapZoom+delta));
   const ws2=256*Math.pow(2,nz),scale=ws2/ws1;
   panX=(centerX*ws1+panX+(mx-W()/2))*scale-centerX*ws2-(mx-W()/2);
   panY=(centerY*ws1+panY+(my-H()/2))*scale-centerY*ws2-(my-H()/2);
@@ -377,7 +377,7 @@ canvas.addEventListener('wheel',e=>{
 
 function zoomBy(f){
   const ws1=worldScale(),wc={x:centerX*ws1+panX,y:centerY*ws1+panY};
-  mapZoom=Math.max(12,Math.min(17,mapZoom+f));
+  mapZoom=Math.max(10,Math.min(17,mapZoom+f));
   const ws2=worldScale();
   panX=wc.x/ws1*ws2-centerX*ws2;panY=wc.y/ws1*ws2-centerY*ws2;render();
 }
