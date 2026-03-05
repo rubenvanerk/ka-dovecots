@@ -29,11 +29,6 @@
   .stat-card .value.danger{color:var(--gap);}
   .stat-card .value.success{color:var(--covered);}
   .stat-card .value.warn{color:var(--tower);}
-  .ai-badge{
-    display:inline-block;font-size:0.52rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:0.06em;background:#e8e3db;color:#8a7e72;padding:0.15rem 0.35rem;
-    border-radius:3px;vertical-align:middle;margin-left:0.3rem;
-  }
   .main-container{display:grid;grid-template-columns:1fr 440px;flex:1;min-height:0;}
   @media(max-width:900px){
     html,body{height:auto;overflow:auto;}
@@ -53,7 +48,6 @@
   .legend{top:0.7rem;left:0.7rem;display:flex;flex-direction:column;gap:0.35rem;}
   .legend-item{display:flex;align-items:center;gap:0.4rem;color:var(--text-muted);}
   .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-  .legend-diamond{width:8px;height:8px;transform:rotate(45deg);flex-shrink:0;}
   .controls-panel{top:0.7rem;right:0.7rem;display:flex;flex-direction:column;gap:0.3rem;}
   .toggle-row{display:flex;align-items:center;gap:0.4rem;cursor:pointer;user-select:none;color:var(--text-muted);}
   .toggle-row input[type="checkbox"]{accent-color:var(--accent);width:13px;height:13px;}
@@ -90,8 +84,6 @@
   .zone-card h3{font-size:0.78rem;font-weight:700;margin-bottom:0.25rem;}
   .zone-card p{font-size:0.72rem;color:var(--text-muted);line-height:1.5;}
   .zone-gap{border-left:3px solid var(--gap);}
-  .zone-suggested{border-left:3px solid var(--suggested);}
-  .zone-suggested h3{color:var(--suggested);}
   .cta{
     background:linear-gradient(135deg,rgba(212,66,30,0.06),rgba(192,57,43,0.04));
     border:1px solid rgba(212,66,30,0.2);border-radius:8px;padding:1rem;text-align:center;
@@ -162,7 +154,6 @@
     <div class="stat-card"><div class="label">Aktive Türme</div><div class="value warn">5</div></div>
     <div class="stat-card"><div class="label">Radius <span id="radiusLabel">500m</span></div><div class="value success" id="coveredPct">—</div></div>
     <div class="stat-card"><div class="label">Versorgungslücke</div><div class="value danger" id="gapPct">—</div></div>
-    <div class="stat-card"><div class="label">Türme nötig (ca.) <span class="ai-badge">KI-Schätzung</span></div><div class="value" style="color:var(--suggested)" id="towersNeeded">—</div></div>
   </div>
 </div>
 
@@ -174,13 +165,11 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--tower);box-shadow:0 0 4px var(--tower)"></div><span>Bestehender Turm</span></div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--covered)"></div><span>Abdeckungsradius</span></div>
       <div class="legend-item"><div class="legend-dot" style="background:rgba(192,57,43,0.3)"></div><span>Versorgungslücke</span></div>
-      <div class="legend-item"><div class="legend-diamond" style="background:var(--suggested)"></div><span>Vorgeschlagen <span class="ai-badge">KI</span></span></div>
       <div class="legend-item"><div class="legend-triangle"></div><span>Bekannter Hotspot</span></div>
     </div>
 
     <div class="overlay-panel controls-panel">
       <label class="toggle-row"><input type="checkbox" id="togGap" checked> Lücken-Heatmap</label>
-      <label class="toggle-row"><input type="checkbox" id="togSuggested"> Vorschläge <span class="ai-badge">KI</span></label>
       <label class="toggle-row"><input type="checkbox" id="togHotspots" checked> Bekannte Hotspots</label>
       <label class="toggle-row"><input type="checkbox" id="togLabels" checked> Beschriftung</label>
       <div class="radius-label">Analyse-Radius:</div>
@@ -257,19 +246,6 @@
       </p>
     </div>
 
-    <div>
-      <h2 style="color:var(--suggested)">Vorgeschlagene Standorte <span class="ai-badge">KI-Empfehlung</span></h2>
-      <p style="font-size:0.68rem;color:var(--text-muted);margin-bottom:0.4rem;line-height:1.45">
-        Die folgenden Standorte sind KI-generierte Vorschläge auf Basis der Abdeckungsanalyse. Sie berücksichtigen keine lokalen Gegebenheiten wie Gebäudeverfügbarkeit, Eigentumsverhältnisse oder bestehende Tauben-Hotspot-Daten.
-      </p>
-      <div style="display:flex;flex-direction:column;gap:0.5rem">
-        <div class="zone-card zone-suggested"><h3>A — Südstadt / Hbf</h3><p>Schließt die größte Lücke. Hohe Taubendichte nahe dem Hauptbahnhof.</p></div>
-        <div class="zone-card zone-suggested"><h3>B — Oststadt</h3><p>Überbrückt die Lücke zwischen Innenstadttürmen und Durlach.</p></div>
-        <div class="zone-card zone-suggested"><h3>C — Mühlburg</h3><p>Erweitert die Abdeckung in den dicht besiedelten Westen.</p></div>
-        <div class="zone-card zone-suggested"><h3>D — Nordweststadt</h3><p>Versorgt die nördliche Lücke.</p></div>
-        <div class="zone-card zone-suggested"><h3>E — Süd-Durlach</h3><p>Der bestehende Turm deckt nur einen kleinen Teil des Stadtteils ab.</p></div>
-      </div>
-    </div>
     <div class="cta">
       <h3>5 Türme schützen nur einen Bruchteil.</h3>
       <p>Ein Fütterungsverbot ohne ausreichende Turminfrastruktur zwingt die Mehrheit der Karlsruher Stadttauben zum Hungern — nicht weil sie keine Türme nutzen würden, sondern weil es keine Türme für sie gibt.</p>
@@ -342,7 +318,6 @@
       <h3>Methodik</h3>
       <p>Turmkoordinaten von lokalen Tierschützern. Reichweiten: 300m (stark — Tauben nutzen zuverlässig einen nahen Turm), 500m (mäßig), 1000m (theoretisches Maximum). Flächenabdeckung berechnet gegen ein Polygon der bebauten Stadtfläche. Die Heatmap zeigt Bereiche, die außerhalb des gewählten Radius liegen — je dunkler, desto weiter entfernt vom nächsten Turm.</p>
       <p style="margin-top:0.3rem">Das Augsburger Modell selbst empfiehlt ein Fütterungsverbot im Radius von ca. 400 Metern um jeden Schlag. Ein Fütterungsverbot ist nur dort sinnvoll und vertretbar, wo tatsächlich ein Turm in Reichweite ist. <span class="source-tag">(<a class="source-link" href="https://stadttaubenhilfe-boppard.de/fragen-und-antworten-zu-stadttauben/was-ist-das-augsburger-modell/" target="_blank">Stadttaubenhilfe Boppard / BAG Stadttauben</a>)</span></p>
-      <p style="margin-top:0.3rem"><strong>Hinweis:</strong> Die Schätzung „Türme nötig" und die vorgeschlagenen Standorte sind <span class="ai-badge">KI-generiert</span> und berücksichtigen keine realen Taubenpopulationsdaten, Gebäudeverfügbarkeit oder lokale Besonderheiten. Sie dienen als Diskussionsgrundlage.</p>
     </div>
     <div style="margin-top:auto;padding-top:1rem;display:flex;justify-content:center;">
       <a href="https://poweredby.soy" target="_blank" style="opacity:0.35;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=0.35">
@@ -361,13 +336,6 @@ const TOWERS=[
   {lat:49.00759741335346,lng:8.398087439992846,name:"Turm Süd-Mitte"},
   {lat:49.00947898308795,lng:8.419205592852764,name:"Turm Mitte-Ost"},
   {lat:48.998463819002204,lng:8.474148930061281,name:"Turm Durlach"},
-];
-const SUGGESTED=[
-  {lat:48.9935,lng:8.402,name:"A — Südstadt/Hbf"},
-  {lat:49.008,lng:8.438,name:"B — Oststadt"},
-  {lat:49.013,lng:8.365,name:"C — Mühlburg"},
-  {lat:49.020,lng:8.395,name:"D — Nordwest"},
-  {lat:48.993,lng:8.462,name:"E — S. Durlach"},
 ];
 const HOTSPOTS=[
   {lat:49.01003920549964,lng:8.394179505229648,name:"Europaplatz"},
@@ -392,7 +360,7 @@ function lng2x(lng){return(lng+180)/360;}
 
 let mapZoom=14,centerX=lng2x(8.420),centerY=lat2y(49.005),panX=0,panY=0;
 let analysisRadius=500;
-let layers={gap:true,suggested:false,labels:true,hotspots:true};
+let layers={gap:true,labels:true,hotspots:true};
 
 function worldScale(){return 256*Math.pow(2,mapZoom);}
 function resize(){
@@ -524,11 +492,6 @@ function calcCoverage(){
   document.getElementById('gapPct').textContent=Math.round(100-pct)+'%';
   document.getElementById('radiusLabel').textContent=analysisRadius>=1000?(analysisRadius/1000)+'km':analysisRadius+'m';
 
-  const cellKm2=GRID_STEP*111.32*GRID_STEP*111.32*Math.cos(49.005*Math.PI/180);
-  const uncoveredKm2=(total-covered)*cellKm2;
-  const towerArea=Math.PI*(analysisRadius/1000)**2;
-  const additional=Math.ceil(uncoveredKm2/towerArea*0.12);
-  document.getElementById('towersNeeded').textContent='~'+Math.max(5+additional,5);
 }
 
 // === DRAWING ===
@@ -578,31 +541,6 @@ function drawTowerMarkers(){
       ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=3.5;
       ctx.strokeText(t.name,p.x+13,p.y+4);
       ctx.fillStyle='#6b4000';ctx.fillText(t.name,p.x+13,p.y+4);
-    }
-  }
-}
-
-function drawSuggested(){
-  if(!layers.suggested)return;
-  for(const s of SUGGESTED){
-    const p=geo(s.lat,s.lng);
-    // Show suggested coverage ring at current analysis radius
-    const r=m2px(analysisRadius);
-    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
-    ctx.strokeStyle='rgba(26,122,138,0.22)';ctx.lineWidth=1.3;
-    ctx.setLineDash([5,4]);ctx.stroke();ctx.setLineDash([]);
-    // Marker
-    ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);
-    ctx.fillStyle='rgba(26,122,138,0.12)';ctx.fill();
-    ctx.strokeStyle='#1a7a8a';ctx.lineWidth=1.5;ctx.stroke();
-    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.PI/4);
-    ctx.fillStyle='#1a7a8a';ctx.fillRect(-3.5,-3.5,7,7);
-    ctx.restore();
-    if(layers.labels){
-      ctx.font='700 10px "DM Sans"';ctx.textAlign='left';
-      ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=3.5;
-      ctx.strokeText(s.name,p.x+12,p.y+4);
-      ctx.fillStyle='#0d4a52';ctx.fillText(s.name,p.x+12,p.y+4);
     }
   }
 }
@@ -678,7 +616,7 @@ function render(){
     rq=false;
     ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,W(),H());
-    drawTiles();drawGap();drawBoundary();drawRings();drawSuggested();drawHotspots();drawTowerMarkers();drawUserLocation();drawScale();
+    drawTiles();drawGap();drawBoundary();drawRings();drawHotspots();drawTowerMarkers();drawUserLocation();drawScale();
     ctx.restore();
   });
 }
@@ -786,8 +724,8 @@ document.getElementById('locateMe').onclick=()=>{
 };
 
 // Simplified toggles
-['togGap','togSuggested','togLabels','togHotspots'].forEach(id=>{
-  const k={togGap:'gap',togSuggested:'suggested',togLabels:'labels',togHotspots:'hotspots'}[id];
+['togGap','togLabels','togHotspots'].forEach(id=>{
+  const k={togGap:'gap',togLabels:'labels',togHotspots:'hotspots'}[id];
   document.getElementById(id).onchange=e=>{layers[k]=e.target.checked;render();};
 });
 
