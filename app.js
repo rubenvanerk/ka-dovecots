@@ -1,8 +1,8 @@
 const TOWERS=[
   {lat:49.010924967578234,lng:8.386127143611693,name:"Turm West"},
   {lat:49.01189835923452,lng:8.406438513549588,name:"Turm Mitte-West"},
-  {lat:49.00759741335346,lng:8.398087439992846,name:"Turm Süd-Mitte"},
-  {lat:49.00947898308795,lng:8.419205592852764,name:"Turm Mitte-Ost"},
+  {lat:49.00759741335346,lng:8.398087439992846,name:"Schlag Süd-Mitte"},
+  {lat:49.00947898308795,lng:8.419205592852764,name:"Schlag Mitte-Ost"},
   {lat:48.998463819002204,lng:8.474148930061281,name:"Turm Durlach"},
 ];
 const HOTSPOTS=[
